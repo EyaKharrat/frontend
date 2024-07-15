@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Registre = () => {
   const initialFormData = {
@@ -13,6 +14,8 @@ const Registre = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [errors, setErrors] = useState({});
+  
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,7 +59,7 @@ const Registre = () => {
     try {
       setLoading(true);
       setError(null);
-      // Prepare data in the format expected by your API (UserDTO)
+
       const requestData = {
         Name: formData.Name,
         Email: formData.Email,
@@ -64,16 +67,17 @@ const Registre = () => {
         ConfirmPassword: formData.ConfirmPassword
       };
 
-      // Make POST request to your .NET Core API
-      const response = await axios.post("http://localhost:5129/api/Account/register", requestData);
+      const response = await axios.post("https://localhost:7029/api/Account/register", requestData);
 
-      // Handle success
-      alert("Registration Successful");
-      setFormData(initialFormData);
-      setErrors({});
-      // Optionally, you might want to handle the response or redirect the user
+      if (response.status === 200) {
+        alert("Registration Successful");
+        setFormData(initialFormData);
+        setErrors({});
+        navigate('/login');
+      } else {
+        setError("Registration Failed");
+      }
     } catch (err) {
-      // Handle errors
       setError(err.message || 'Error occurred during registration');
     } finally {
       setLoading(false);
@@ -81,104 +85,95 @@ const Registre = () => {
   };
 
   return (
-    <div>
-      <section style={{ backgroundColor: '#f0f0f0' }}>
-        <div className="mask d-flex align-items-center h-100 gradient-custom-3">
-          <div className="container h-100">
-            <div className="row d-flex justify-content-center align-items-center h-100">
-              <div className="col-12 col-md-9 col-lg-7 col-xl-6">
-                <div className="card" style={{ borderRadius: '15px' }}>
-                  <div className="card-body p-5">
-                    <h2 className="text-uppercase text-center mb-5">Create an account</h2>
-
-                    <form onSubmit={save}>
-                      <div className="form-outline mb-4">
-                        <label className="form-label" htmlFor="Name">Your Name</label>
-                        <input
-                          type="text"
-                          id="Name"
-                          className="form-control form-control-lg"
-                          name="Name"
-                          value={formData.Name}
-                          onChange={handleChange}
-                          required
-                        />
-                        {errors.Name && <div style={{ color: 'red' }}>{errors.Name}</div>}
-                      </div>
-
-                      <div className="form-outline mb-4">
-                        <label className="form-label" htmlFor="Email">Your Email</label>
-                        <input
-                          type="email"
-                          id="Email"
-                          className="form-control form-control-lg"
-                          name="Email"
-                          value={formData.Email}
-                          onChange={handleChange}
-                          required
-                        />
-                        {errors.Email && <div style={{ color: 'red' }}>{errors.Email}</div>}
-                      </div>
-
-                      <div className="form-outline mb-4">
-                        <label className="form-label" htmlFor="Password">Password</label>
-                        <input
-                          type="password"
-                          id="Password"
-                          className="form-control form-control-lg"
-                          name="Password"
-                          value={formData.Password}
-                          onChange={handleChange}
-                          required
-                        />
-                        {errors.Password && <div style={{ color: 'red' }}>{errors.Password}</div>}
-                      </div>
-
-                      <div className="form-outline mb-4">
-                        <label className="form-label" htmlFor="ConfirmPassword">Repeat your password</label>
-                        <input
-                          type="password"
-                          id="ConfirmPassword"
-                          className="form-control form-control-lg"
-                          name="ConfirmPassword"
-                          value={formData.ConfirmPassword}
-                          onChange={handleChange}
-                          required
-                        />
-                        {errors.ConfirmPassword && <div style={{ color: 'red' }}>{errors.ConfirmPassword}</div>}
-                      </div>
-
-                      <div className="form-check d-flex justify-content-center mb-5">
-                        <input className="form-check-input me-2" type="checkbox" value="" id="form2Example3cg" required />
-                        <label className="form-check-label" htmlFor="form2Example3cg">
-                          I agree to all statements in <a href="#!" className="text-body"><u>Terms of service</u></a>
-                        </label>
-                      </div>
-
-                      <div className="d-flex justify-content-center">
-                        <button
-                          type="submit"
-                          className="btn btn-success btn-block btn-lg gradient-custom-4 text-body"
-                          disabled={loading}
-                        >
-                          Register
-                        </button>
-                      </div>
-
-                      {loading && <p>Loading...</p>}
-                      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-                      <p className="text-center text-muted mt-5 mb-0">
-                        Have already an account? <a href="#!" className="fw-bold text-body"><u>Login here</u></a>
-                      </p>
-                    </form>
-                  </div>
-                </div>
-              </div>
+    <div className="container mt-4">
+      <div className="card shadow">
+        <div className="card-body">
+          <h5 className="card-title text-center mb-4">Registre</h5>
+          <form onSubmit={save}>
+            <div className="form-group mb-4">
+              <label htmlFor="Name">Your Name</label>
+              <input
+                type="text"
+                id="Name"
+                className={`form-control ${errors.Name ? 'is-invalid' : ''}`}
+                name="Name"
+                value={formData.Name}
+                onChange={handleChange}
+                required
+              />
+              {errors.Name && <div className="invalid-feedback">{errors.Name}</div>}
             </div>
-          </div>
+
+            <div className="form-group mb-4">
+              <label htmlFor="Email">Your Email</label>
+              <input
+                type="email"
+                id="Email"
+                className={`form-control ${errors.Email ? 'is-invalid' : ''}`}
+                name="Email"
+                value={formData.Email}
+                onChange={handleChange}
+                required
+              />
+              {errors.Email && <div className="invalid-feedback">{errors.Email}</div>}
+            </div>
+
+            <div className="form-group mb-4">
+              <label htmlFor="Password">Password</label>
+              <input
+                type="password"
+                id="Password"
+                className={`form-control ${errors.Password ? 'is-invalid' : ''}`}
+                name="Password"
+                value={formData.Password}
+                onChange={handleChange}
+                required
+              />
+              {errors.Password && <div className="invalid-feedback">{errors.Password}</div>}
+            </div>
+
+            <div className="form-group mb-4">
+              <label htmlFor="ConfirmPassword">Repeat your password</label>
+              <input
+                type="password"
+                id="ConfirmPassword"
+                className={`form-control ${errors.ConfirmPassword ? 'is-invalid' : ''}`}
+                name="ConfirmPassword"
+                value={formData.ConfirmPassword}
+                onChange={handleChange}
+                required
+              />
+              {errors.ConfirmPassword && <div className="invalid-feedback">{errors.ConfirmPassword}</div>}
+            </div>
+
+            <div className="form-check mb-4">
+              <input className="form-check-input" type="checkbox" value="" id="form2Example3cg" required />
+              <label className="form-check-label" htmlFor="form2Example3cg">
+                I agree to all statements in <a href="#!" className="text-body"><u>Terms of service</u></a>
+              </label>
+            </div>
+
+            <div className="text-center">
+              <button
+                type="submit"
+                className="btn btn-success btn-lg"
+                disabled={loading}
+              >
+                {loading ? 'Loading...' : 'Register'}
+              </button>
+            </div>
+
+            {error && <p className="text-danger mt-3">{error}</p>}
+
+            <p className="text-center text-muted mt-4 mb-0">
+              Already have an account?{' '}
+              <a href="#!" onClick={() => navigate('/login')} className="fw-bold text-body">
+                <u>Login here</u>
+              </a>
+            </p>
+          </form>
         </div>
-      </section>
+      </div>
     </div>
   );
 };
