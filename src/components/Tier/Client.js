@@ -71,6 +71,7 @@ export const Client = ({ recordForEdit, addOrEdit, onClose }) => {
             } else {
                 console.log("this is my form data",formData)
                 let data = {
+
                     typeC: formData.typeC,
                     cnom: formData.cnom,
                     cprenom: formData.cprenom,

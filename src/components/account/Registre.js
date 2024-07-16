@@ -85,7 +85,7 @@ const Registre = () => {
   };
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-4" style={{ maxWidth: '500px' }}>
       <div className="card shadow">
         <div className="card-body">
           <h5 className="card-title text-center mb-4">Registre</h5>

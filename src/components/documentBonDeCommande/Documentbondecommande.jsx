@@ -1,231 +1,226 @@
-import React from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 
-class Addbondecommande extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            DocAnnee: '',
-            DocType: '',
-            DocRef: '',
-            DocDate: '',
-            DocTiers: '',
-            DocDateEcheance: '',
-            DocRefExt: '',
-            DocNumDoc: '',
-            DocCommentaire: '',
-            DocLancement: '',
-            DocCloture: ''
-        };
-    }
+const Addbondecommande = ({ recordForEdit, addOrEdit, onClose }) => {
+    const [formData, setFormData] = useState({
+        docAnnee: '',
+        docType: '',
+        docRef: '',
+        docDate: '',
+        docTiers: '',
+        docDateEcheance: '',
+        docRefExt: '',
+        docNumDoc: '',
+        docCommentaire: '',
+        docLancement: '',
+        docCloture: ''
+    });
 
-    Addbondecommande = () => {
-        const payload = {
-            DocAnnee: this.state.DocAnnee,
-            DocType: this.state.DocType,
-            DocRef: this.state.DocRef,
-            DocDate: this.state.DocDate,
-            DocTiers: this.state.DocTiers,
-            DocDateEcheance: this.state.DocDateEcheance,
-            DocRefExt: this.state.DocRefExt,
-            DocNumDoc: this.state.DocNumDoc,
-            DocCommentaire: this.state.DocCommentaire,
-            DocLancement: this.state.DocLancement,
-            DocCloture: this.state.DocCloture
-        };
-
-        console.log('Payload:', payload);
-
-        axios.post('https://localhost:7029/api/DocumentBonCommandes', payload)
-            .then(json => {
-                if (json.data.Status === 'Success') {
-                    alert("Data Saved Successfully");
-                    this.props.history.push('/home');
-                } else {
-                    alert('Data not Saved');
-                    console.log('Response:', json);
-                }
-            })
-            .catch(error => {
-                console.error('There was an error!', error);
-            });
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
     };
 
-    handleChange = (e) => {
-        this.setState({ [e.target.name]: e.target.value });
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const payload = { ...formData };
+            const response = await axios.post('https://localhost:7029/api/DocumentBonCommandes', payload);
+            console.log('Response:', response);
+            if (response.data.Status === 'Success') {
+                alert("Data Saved Successfully");
+                onClose();
+            } else {
+                alert('Data not Saved');
+            }
+        } catch (error) {
+            console.error('There was an error!', error);
+            alert('There was an error!');
+        }
     };
 
-    handleSubmit = (e) => {
-        e.preventDefault();
-        this.Addbondecommande();
-    };
-
-    render() {
-        return (
-            <div className="container">
-                {/* First card containing the form */}
-                <div className="card mb-3">
-                    <div className="card-body">
-                        <h5 className="card-title">Document Bon de Commande</h5>
-                        <form onSubmit={this.handleSubmit}>
-                            <div className="row">
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <label>Num Document:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control form-control-sm"
-                                            name="DocNumDoc"
-                                            value={this.state.DocNumDoc}
-                                            onChange={this.handleChange}
-                                            placeholder="Num Doc"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <label>Annee:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="DocAnnee"
-                                            value={this.state.DocAnnee}
-                                            onChange={this.handleChange}
-                                            placeholder="Annee"
-                                        />
-                                    </div>
+    return (
+        <div className="container">
+            <div className="card mb-3">
+                <div className="card-body">
+                    <h5 className="card-title">Document Bon de Commande</h5>
+                    <form onSubmit={handleSubmit}>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="docNumDoc">Num Document:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control form-control-sm"
+                                        name="docNumDoc"
+                                        id="docNumDoc"
+                                        placeholder="Num Doc"
+                                        value={formData.docNumDoc}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                             </div>
-                            <div className="row">
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <label>Date Lancement:</label>
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            name="DocLancement"
-                                            value={this.state.DocLancement}
-                                            onChange={this.handleChange}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <label>Date Cloture:</label>
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            name="DocCloture"
-                                            value={this.state.DocCloture}
-                                            onChange={this.handleChange}
-                                        />
-                                    </div>
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="docAnnee">Année:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="docAnnee"
+                                        id="docAnnee"
+                                        placeholder="Année"
+                                        value={formData.docAnnee}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                             </div>
-                            <div className="form-group">
-                                <label>Tiers:</label>
-                                <select
-                                    className="form-control"
-                                    name="DocTiers"
-                                    value={this.state.DocTiers}
-                                    onChange={this.handleChange}
-                                >
-                                    <option value="">Select Type</option>
-                                    <option value="Client">Client</option>
-                                    <option value="Fournisseur">Fournisseur</option>
-                                    <option value="Represantant">Represantant</option>
-                                </select>
-                            </div>
-                            <div className="row">
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <label>Ref:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="DocRef"
-                                            value={this.state.DocRef}
-                                            onChange={this.handleChange}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <label>Ref Ext:</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="DocRefExt"
-                                            value={this.state.DocRefExt}
-                                            onChange={this.handleChange}
-                                        />
-                                    </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="docLancement">Date Lancement:</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="docLancement"
+                                        id="docLancement"
+                                        value={formData.docLancement}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                             </div>
-                            <div className="row">
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <label>Date Début:</label>
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            name="DocDate"
-                                            value={this.state.DocDate}
-                                            onChange={this.handleChange}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="col-md-6">
-                                    <div className="form-group">
-                                        <label>Date Echeance:</label>
-                                        <input
-                                            type="date"
-                                            className="form-control"
-                                            name="DocDateEcheance"
-                                            value={this.state.DocDateEcheance}
-                                            onChange={this.handleChange}
-                                        />
-                                    </div>
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="docCloture">Date Cloture:</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="docCloture"
+                                        id="docCloture"
+                                        value={formData.docCloture}
+                                        onChange={handleChange}
+                                    />
                                 </div>
                             </div>
-                            <div className="form-group">
-                                <label>Doc Type:</label>
-                                <select
-                                    className="form-control"
-                                    name="DocType"
-                                    value={this.state.DocType}
-                                    onChange={this.handleChange}
-                                >
-                                    <option value="">Select Type Document</option>
-                                    <option value="Bon De Commande">Bon De Commande</option>
-                                    <option value="Bon de livraison">Bon de livraison</option>
-                                    <option value="Bon d'entrée">Bon d'entrée</option>
-                                </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="docTiers">Tiers:</label>
+                            <select
+                                className="form-control"
+                                name="docTiers"
+                                id="docTiers"
+                                value={formData.docTiers}
+                                onChange={handleChange}
+                            >
+                                <option value="">Select Type</option>
+                                <option value="Client">Client</option>
+                                <option value="Fournisseur">Fournisseur</option>
+                                <option value="Representant">Representant</option>
+                            </select>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="docRef">Ref:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="docRef"
+                                        id="docRef"
+                                        placeholder="Ref"
+                                        value={formData.docRef}
+                                        onChange={handleChange}
+                                    />
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="exampleFormControlTextarea1">Doc Commentaire:</label>
-                                <textarea
-                                    className="form-control"
-                                    name="DocCommentaire"
-                                    value={this.state.DocCommentaire}
-                                    onChange={this.handleChange}
-                                />
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="docRefExt">Ref Ext:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="docRefExt"
+                                        id="docRefExt"
+                                        placeholder="Ref Ext"
+                                        value={formData.docRefExt}
+                                        onChange={handleChange}
+                                    />
+                                </div>
                             </div>
-                            <button type="submit" className="btn btn-primary">Submit</button>
-                        </form>
-                    </div>
+                        </div>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="docDate">Date Début:</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="docDate"
+                                        id="docDate"
+                                        value={formData.docDate}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-group">
+                                    <label htmlFor="docDateEcheance">Date Echéance:</label>
+                                    <input
+                                        type="date"
+                                        className="form-control"
+                                        name="docDateEcheance"
+                                        id="docDateEcheance"
+                                        value={formData.docDateEcheance}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="docType">Doc Type:</label>
+                            <select
+                                className="form-control"
+                                name="docType"
+                                id="docType"
+                                value={formData.docType}
+                                onChange={handleChange}
+                            >
+                                <option value="">Select Type Document</option>
+                                <option value="Bon De Commande">Bon De Commande</option>
+                                <option value="Bon de livraison">Bon de livraison</option>
+                                <option value="Bon d'entrée">Bon d'entrée</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="docCommentaire">Doc Commentaire:</label>
+                            <textarea
+                                className="form-control"
+                                name="docCommentaire"
+                                id="docCommentaire"
+                                placeholder="Doc Commentaire"
+                                value={formData.docCommentaire}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <button type="submit" className="btn btn-primary">Submit</button>
+                    </form>
                 </div>
+            </div>
 
-                {/* Second card below the form card */}
-                <div className="card mb-3">
-                    <div className="card-body">
-                        <h5 className="card-title">Additional Information</h5>
-                        <p>Content for the second card goes here.</p>
+            {/* Second card below the form card */}
+            <div className="card mb-3">
+                <div className="card-body">
+                    <h5 className="card-title">Second Card</h5>
+                    <div className="mb-3">
+                        {/* Content for the second card */}
                     </div>
                 </div>
             </div>
-        );
-    }
-}
+        </div>
+    );
+};
 
 export default Addbondecommande;
