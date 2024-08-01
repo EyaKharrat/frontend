@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export const Client = ({ recordForEdit, addOrEdit, onClose }) => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         cref: '',  
         typeC: '',
@@ -63,15 +65,11 @@ export const Client = ({ recordForEdit, addOrEdit, onClose }) => {
         try {
             let newClient;
             if (recordForEdit) {
-     
                 await axios.put(`https://localhost:7029/api/Tiers/UpdateTier/${formData.cref}`, formData);
                 alert('Client updated successfully!');
                 newClient = formData;
-                
             } else {
-                console.log("this is my form data",formData)
-                let data = {
-
+                const data = {
                     typeC: formData.typeC,
                     cnom: formData.cnom,
                     cprenom: formData.cprenom,
@@ -83,17 +81,18 @@ export const Client = ({ recordForEdit, addOrEdit, onClose }) => {
                     cpays: formData.cpays,
                     ccodePostal: formData.ccodePostal,
                     craisonSocial: formData.craisonSocial,
-                    cmatFiscal:formData.cmatFiscal,
+                    cmatFiscal: formData.cmatFiscal,
                     rc: formData.rc
-                }
+                };
                 const response = await axios.post('https://localhost:7029/api/Tiers/AddTier', data);
                 newClient = response.data;
                 alert('Client added successfully!');
+                navigate('/clientlist');
             }
-            addOrEdit(newClient); // Appeler addOrEdit avec le client ajouté ou mis à jour
+            addOrEdit(newClient); // Call addOrEdit with the newly added or updated client
+            if (onClose) onClose(); // Call onClose if provided
         } catch (error) {
             console.error('There was an error submitting the form!', error);
-            alert('There was an error submitting the form!');
         }
     };
 
@@ -102,7 +101,7 @@ export const Client = ({ recordForEdit, addOrEdit, onClose }) => {
             <form onSubmit={handleSubmit}>
                 <div className="card">
                     <div className="card-header">
-                        {recordForEdit ? 'Edit Client' : 'Client'}
+                        {recordForEdit ? 'Edit Client' : 'Add Client'}
                     </div>
                     <div className="card-body">
                         <div className="row">
@@ -118,7 +117,7 @@ export const Client = ({ recordForEdit, addOrEdit, onClose }) => {
                                                 value={formData.typeC}
                                                 onChange={handleClientTypeChange}
                                             >
-                                                <option value=""></option>
+                                                <option value="">Select Type</option>
                                                 <option value="Personne Physique">Personne Physique</option>
                                                 <option value="Société">Société</option>
                                             </select>

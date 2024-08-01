@@ -1,40 +1,42 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, makeStyles, Typography, IconButton } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
+import { Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/system';
 
-const useStyles = makeStyles(theme => ({
-    dialogWrapper: {
-        padding: theme.spacing(2),
-        position: 'absolute',
-        top: theme.spacing(5),
-        minWidth: '600px' // Adjust the width as needed
-    },
-    dialogTitle: {
-        paddingRight: '0px'
-    }
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiPaper-root': {
+    padding: theme.spacing(2),
+    position: 'absolute',
+    top: theme.spacing(5),
+    minWidth: '600px', // Ajustez la largeur si nécessaire
+  },
 }));
 
-const Popup = (props) => {
-    const { title, children, openPopup, setOpenPopup } = props;
-    const classes = useStyles();
+const DialogTitleWrapper = styled(DialogTitle)({
+  paddingRight: '0px',
+});
 
-    return (
-        <Dialog open={openPopup} maxWidth="md" classes={{ paper: classes.dialogWrapper }}>
-            <DialogTitle className={classes.dialogTitle}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="h6" style={{ flexGrow: 1 }}>
-                        {title}
-                    </Typography>
-                    <IconButton color="secondary" onClick={() => setOpenPopup(false)}>
-                        <CloseIcon />
-                    </IconButton>
-                </div>
-            </DialogTitle>
-            <DialogContent dividers>
-                {children}
-            </DialogContent>
-        </Dialog>
-    );
+const Popup = (props) => {
+  const { title, children, openPopup, setOpenPopup } = props;
+
+  return (
+    <StyledDialog open={openPopup} maxWidth="md">
+      <DialogTitleWrapper>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="h6" style={{ flexGrow: 1 }}>
+            {title}
+          </Typography>
+          <IconButton color="secondary" onClick={() => setOpenPopup(false)}>
+            <CloseIcon />
+          </IconButton>
+        </div>
+      </DialogTitleWrapper>
+      <DialogContent dividers>
+        {children}
+      </DialogContent>
+    </StyledDialog>
+  );
 };
 
 export default Popup;

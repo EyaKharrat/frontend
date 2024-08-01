@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Client } from './Client';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, InputAdornment, TextField } from '@mui/material';
+import { AiOutlineUserDelete } from "react-icons/ai";
+import { CiEdit } from "react-icons/ci";
+import { IoMdPersonAdd } from "react-icons/io";
+import { MdPersonSearch } from "react-icons/md";
 
 const ClientList = () => {
     const [clients, setClients] = useState([]);
     const [recordForEdit, setRecordForEdit] = useState(null);
     const [open, setOpen] = useState(false);
-    
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         fetchClients();
@@ -28,7 +32,7 @@ const ClientList = () => {
         } else {
             setClients([...clients, client]);
         }
-        handleClose(); // Fermer le popup après l'ajout ou la mise à jour
+        handleClose(); // Close the popup after adding or updating
     };
 
     const handleEdit = (client) => {
@@ -56,11 +60,46 @@ const ClientList = () => {
         setRecordForEdit(null);
     };
 
+    const handleSearch = (event) => {
+        setSearchQuery(event.target.value);
+    };
+
+    const filteredClients = clients.filter(client =>
+    
+        client.typeC.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        client.cnom.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        client.cprenom.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        client.cville.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        client.cadresse.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        client.cmatFiscal.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        client.craisonSocial.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div>
-            <Button variant="outlined" onClick={handleClickOpen}>
-                Add Client
-            </Button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '700px', marginBottom: '10px' }}>
+                <Button
+                    variant="outlined"
+                    onClick={handleClickOpen}
+                    style={{  height: '40px' }}
+                >
+                    <IoMdPersonAdd /> Add Client
+                </Button>
+                <TextField
+                    variant="outlined"
+                    placeholder="Search"
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    style={{ flex: 1, height: '40px' }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <MdPersonSearch />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+            </div>
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>{recordForEdit ? 'Edit Client' : 'Add Client'}</DialogTitle>
                 <DialogContent>
@@ -77,21 +116,30 @@ const ClientList = () => {
                     <tr>
                         <th>Code Client</th>
                         <th>Type de Client</th>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Actions</th>
+                        <th>Nom Complet</th>
+                        <th>Ville</th>
+                        <th>Adresse</th>
+                        <th>Matricule Fiscale</th>
+                        <th>Raison Sociale</th>
+                        <th>Modifier</th>
+                        <th>Supprimer</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {clients.map(client => (
+                    {filteredClients.map(client => (
                         <tr key={client.cref}>
                             <td>{client.cref}</td>
                             <td>{client.typeC}</td>
-                            <td>{client.cnom}</td>
-                            <td>{client.cprenom}</td>
+                            <td>{client.cnom} {client.cprenom}</td>
+                            <td>{client.cville}</td>
+                            <td>{client.cadresse}</td>
+                            <td>{client.cmatFiscal}</td>
+                            <td>{client.craisonSocial}</td>
                             <td>
-                                <button onClick={() => handleEdit(client)} className="btn btn-warning btn-sm mr-2">Edit</button>
-                                <button onClick={() => handleDelete(client.cref)} className="btn btn-danger btn-sm">Delete</button>
+                                <button onClick={() => handleEdit(client)} className="btn btn-warning btn-sm mr-2"><CiEdit /></button>
+                            </td>
+                            <td>
+                                <button onClick={() => handleDelete(client.cref)} className="btn btn-danger btn-sm"><AiOutlineUserDelete /></button>
                             </td>
                         </tr>
                     ))}

@@ -1,20 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
 
-const DetailBonCommande = () => {
-    const [formData, setFormData] = useState({
-        docType: "",
-        docRef: "",
-        docArt: "",
-        docPunit: 0,
-        docQte: 0,
-        docRemise: 0,
-        docTotalHt: 0,
-        docTxTva: 0,
-        docTotalTva: 0,
-        docTotalTtc: 0,
-        docRemiseTotale: 0, // Ajout de la remise totale
-    }); 
+
+const DetailBonCommande = ({ initialData, onSave }) => {
+    const [formData, setFormData] = useState(initialData);
+
 
     const calculateTotals = useCallback(() => {
         const { docQte, docRemise, docTxTva, docPunit } = formData;
@@ -40,14 +29,8 @@ const DetailBonCommande = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        try { 
-            const response = await axios.post('https://localhost:7029/api/DocumentDetailCommandes',formData);
-            console.log('Response:', response);
-            if (response.data.Status === 'Success') {
-                alert("Data Saved Successfully");
-            } else {
-                alert('Data not Saved');
-            }
+        try {
+            await onSave(formData); // Utiliser le callback onSave pour enregistrer les données
         } catch (error) {
             console.error('There was an error!', error);
             alert('There was an error!');
@@ -119,11 +102,11 @@ const DetailBonCommande = () => {
                     <tbody>
                         <tr>
                             <td>{formData.docQte}</td>
-                            <td>{formData.docRemiseTotale.toFixed(2)} €</td>
-                            <td>{formData.docTotalHt.toFixed(2)} €</td>
-                            <td>{formData.docTotalTva.toFixed(2)} €</td>
-                            <td>{formData.docTotalTtc.toFixed(2)} €</td>
-                            <td>{formData.docTotalTtc.toFixed(2)} €</td> {/* Prix Net à Payer = Total TTC */}
+                            <td>{formData.docRemiseTotale.toFixed(2)} dt</td>
+                            <td>{formData.docTotalHt.toFixed(2)} dt</td>
+                            <td>{formData.docTotalTva.toFixed(2)} dt</td>
+                            <td>{formData.docTotalTtc.toFixed(2)} dt</td>
+                            <td>{formData.docTotalTtc.toFixed(2)} dt</td> {/* Prix Net à Payer = Total TTC */}
                         </tr>
                     </tbody>
                 </table>

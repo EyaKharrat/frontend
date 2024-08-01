@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import DetailBonCommande from './DocumentDetail';
 const Addbondecommande = ({ recordForEdit, addOrEdit, onClose }) => {
     const [formData, setFormData] = useState({
         docAnnee: '',
@@ -15,6 +15,19 @@ const Addbondecommande = ({ recordForEdit, addOrEdit, onClose }) => {
         docLancement: '',
         docCloture: ''
     });
+    const [detailData] = useState({
+        docType: "",
+        docRef: "",
+        docArt: "",
+        docPunit: 0,
+        docQte: 0,
+        docRemise: 0,
+        docTotalHt: 0,
+        docTxTva: 0,
+        docTotalTva: 0,
+        docTotalTtc: 0,
+        docRemiseTotale: 0,
+    });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -23,16 +36,28 @@ const Addbondecommande = ({ recordForEdit, addOrEdit, onClose }) => {
             [name]: value
         }));
     };
-
+    const handleDetailSave = async (detailFormData) => {
+        try {
+            const response = await axios.post('https://localhost:7029/api/DocumentDetailCommandes', detailFormData);
+            console.log('Response:', response);
+            if (response.data.uniqueId) {
+                alert("Data Saved Successfully");
+            } else {
+                alert('Data not Saved');
+            }
+        } catch (error) {
+            console.error('There was an error!', error);
+            alert('There was an error!');
+        }
+    };
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
             const payload = { ...formData };
             const response = await axios.post('https://localhost:7029/api/DocumentBonCommandes', payload);
             console.log('Response:', response);
-            if (response.data.Status === 'Success') {
+            if (response.data.uniqueId) {
                 alert("Data Saved Successfully");
-                onClose();
             } else {
                 alert('Data not Saved');
             }
@@ -215,7 +240,10 @@ const Addbondecommande = ({ recordForEdit, addOrEdit, onClose }) => {
                 <div className="card-body">
                     <h5 className="card-title">Second Card</h5>
                     <div className="mb-3">
-                        {/* Content for the second card */}
+                    <DetailBonCommande
+                initialData={detailData}
+                onSave={handleDetailSave}
+            />
                     </div>
                 </div>
             </div>
