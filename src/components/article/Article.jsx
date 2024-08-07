@@ -9,12 +9,12 @@ const initialFieldValues = {
     image: '',
     apuventeHt: '',
     atauxTva: 19, // TVA fixe à 19%
-    amarge: '',
-    apvttc: '',
     aremise: '',
-    aprixVntprom: '',
+    amarge: '',
     auniteVnt: '',
-    aqteStock:''
+    apvttc: '',
+    aqteStock:'',
+    aprixVntprom: ''
 };
 
 export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
@@ -23,8 +23,8 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
     const [errors, setErrors] = useState({});
     const [imagePreview, setImagePreview] = useState('/img/up.jpg');
     const [loading, setLoading] = useState(false);
-    const [step, setStep] = useState(1); // État pour gérer les étapes du formulaire
-    const [isQuantityVisible, setQuantityVisible] = useState(false);
+    const [step, setStep] = useState(1);
+    
     useEffect(() => {
         if (recordForEdit) {
             setValues({
@@ -33,7 +33,7 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
                 asfamille: recordForEdit.asfamille || '',
                 image: recordForEdit.image || '',
                 apuventeHt: recordForEdit.apuventeHt || '',
-                atauxTva: recordForEdit.atauxTva || 19, // TVA fixe à 19%
+                atauxTva: recordForEdit.atauxTva || 19,
                 amarge: recordForEdit.amarge || '',
                 apvttc: recordForEdit.apvttc || '',
                 aremise: recordForEdit.aremise || '',
@@ -48,37 +48,33 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
         }
     }, [recordForEdit]);
 
-    const calculateValues = (apuventeHt, amarge, apvttc, aremise) => {
-        let totalTtc = '';
-        let priceAfterMargin = '';
+    const calculateValues = (apuventeHt, amarge, apvttc, aremise,auniteVnt) => {
         let priceAfterDiscount = '';
 
         if (apuventeHt) {
-            // Calcul du prix total TTC
             const priceHt = parseFloat(apuventeHt);
             const tvaRate = 19 / 100;
-            totalTtc = priceHt * (1 + tvaRate);
+            apvttc = priceHt * (1 + tvaRate);
 
-            // Calcul du prix après marge
             const marge = parseFloat(amarge) / 100;
-            priceAfterMargin = priceHt * (1 + marge);
+            auniteVnt = priceHt * (1 + marge);
         }
 
-        if (priceAfterMargin && aremise) {
+        if (auniteVnt && aremise) {
             const remise = parseFloat(aremise) / 100;
-            priceAfterDiscount = priceAfterMargin - (priceAfterMargin * remise);
+            priceAfterDiscount = auniteVnt - (auniteVnt * remise);
         }
 
-        return { totalTtc, priceAfterMargin, priceAfterDiscount };
+        return { apvttc, auniteVnt, priceAfterDiscount };
     };
 
     useEffect(() => {
-        const { totalTtc, priceAfterMargin, priceAfterDiscount } = calculateValues(values.apuventeHt, values.amarge, values.apvttc, values.aremise);
+        const { apvttc, auniteVnt, priceAfterDiscount } = calculateValues(values.apuventeHt, values.amarge, values.apvttc, values.aremise);
         setValues(prev => ({
             ...prev,
-            apvttc: totalTtc,
+            apvttc: apvttc,
             aprixVntprom: priceAfterDiscount,
-            auniteVnt: priceAfterMargin
+            auniteVnt: auniteVnt
         }));
     }, [values.apuventeHt, values.amarge, values.apvttc, values.aremise]);
 
@@ -147,6 +143,7 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
                 auniteVnt: values.auniteVnt,
                 aqteStock: values.aqteStock,
             };
+            console.log("Submitting form with data:", formData);
 
             try {
                 let newArticle;
@@ -180,17 +177,22 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
         setStep(step - 1);
     };
    
-       
-    
-        const toggleQuantityField = () => {
-            setQuantityVisible(!isQuantityVisible);
-        };
+
+    const formContainerStyle = {
+        maxWidth: '600px', // Adjust the max width
+        margin: '20px auto', // Center the form horizontally
+        padding: '20px', // Add padding for better appearance
+        border: '1px solid #ccc', // Add a border
+        borderRadius: '8px', // Add rounded corners
+        boxShadow: '0 0 10px rgba(0,0,0,0.1)', // Add a subtle shadow
+        backgroundColor: '#fff', // White background
+    };
+
     return (
-        <div className="article-container">
+        <div style={formContainerStyle}>
             <form className="form" autoComplete="off" onSubmit={handleFormSubmit}>
                 {step === 1 && (
                     <>
-                    
                         <div className="form-group">
                             <input
                                 type="file"
@@ -204,6 +206,7 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
                                         src={imagePreview}
                                         className="card-img-top"
                                         alt="Article"
+                                        style={{ maxWidth: '100%', height: 'auto' }}
                                     />
                                 )}
                             </div>
@@ -217,66 +220,67 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
                                 value={values.adesignation}
                                 onChange={handleInputChange}
                             >
-                                <option value="">Sélectionnez une désignation</option>
-                                <option value="designiation1">Jeux et jouets</option>
-                                <option value="designiation2">Animaux et articles pour animaux de compagnie</option>
-                                <option value="designiation3">Véhicules et accessoires</option>
-                                <option value="designiation4">Vêtements et accessoires</option>
-                                <option value="designiation5">Arts et loisirs</option>
-                                <option value="designiation6">Bébés et tout petits</option>
-                                <option value="designiation7">Entreprise et industrie</option>
-                                <option value="designiation8">Appareils photo, caméra et instruments d'optique</option>
-                                <option value="designiation9">Appareils électroniques</option>
-                                <option value="designiation10">Alimentation, boissons et tabac</option>
-                                <option value="designiation11">Meubles</option>
-                                <option value="designiation12">Quincaillerie</option>
-                                <option value="designiation13">Santé et beauté</option>
-                                <option value="designiation14">Maison et jardin</option>
-                                <option value="designiation15">Adultes</option>
-                                <option value="designiation16">Médias</option>
-                                <option value="designiation17">Fourniture de bureau</option>
-                                <option value="designiation18">Offices religieux et cérémonies</option>
-                                <option value="designiation20">Logiciels</option>
-                                <option value="designiation21">Équipements sportifs</option>
-                                <option value="designiation22">Modules complémentaires du produit</option>
-                                <option value="designiation23">Services</option>
-                                <option value="designiation24">Carte cadeaux</option>
-                                <option value="designiation25">Non classé</option>
+                                 <option value="">Sélectionnez une désignation</option>
+                                <option value="Jeux et jouets">Jeux et jouets</option>
+                                <option value="Animaux et articles pour animaux de compagnie">Animaux et articles pour animaux de compagnie</option>
+                                <option value="Véhicules et accessoires">Véhicules et accessoires</option>
+                                <option value="Vêtements et accessoires">Vêtements et accessoires</option>
+                                <option value="Arts et loisirs">Arts et loisirs</option>
+                                <option value="Bébés et tout petits">Bébés et tout petits</option>
+                                <option value="Entreprise et industrie">Entreprise et industrie</option>
+                                <option value="Appareils photo, caméra et instruments d'optique">Appareils photo, caméra et instruments d'optique</option>
+                                <option value="Appareils électroniques">Appareils électroniques</option>
+                                <option value="Alimentation, boissons et tabac">Alimentation, boissons et tabac</option>
+                                <option value="Meubles">Meubles</option>
+                                <option value="Quincaillerie">Quincaillerie</option>
+                                <option value="Santé et beauté">Santé et beauté</option>
+                                <option value="Maison et jardin">Maison et jardin</option>
+                                <option value="Adultes">Adultes</option>
+                                <option value="Médias">Médias</option>
+                                <option value="Fourniture de bureau">Fourniture de bureau</option>
+                                <option value="Offices religieux et cérémonies">Offices religieux et cérémonies</option>
+                                <option value="Logiciels">Logiciels</option>
+                                <option value="Équipements sportifs">Équipements sportifs</option>
+                                <option value="Modules complémentaires du produit">Modules complémentaires du produit</option>
+                                <option value="Services">Services</option>
+                                <option value="Carte cadeaux">Carte cadeaux</option>
+                                <option value="Non classé">Non classé</option>
                             </select>
                             {errors.adesignation && <span className="error-text">{errors.adesignation}</span>}
                         </div>
+
                         <div className="form-group">
-                            <label htmlFor="afamille">Nom de l'article</label>
+                            <label htmlFor="afamille">Famille</label>
                             <input
-                                type="text"
                                 className={`form-control ${errors.afamille ? 'error-input' : ''}`}
                                 name="afamille"
                                 value={values.afamille}
                                 onChange={handleInputChange}
-                                placeholder="Entrez la famille de l'article"
                             />
                             {errors.afamille && <span className="error-text">{errors.afamille}</span>}
                         </div>
+
                         <div className="form-group">
-                            <label htmlFor="asfamille">Marque</label>
+                            <label htmlFor="asfamille">Sous-Famille</label>
                             <input
-                                type="text"
                                 className={`form-control ${errors.asfamille ? 'error-input' : ''}`}
                                 name="asfamille"
                                 value={values.asfamille}
                                 onChange={handleInputChange}
-                                placeholder="Entrez la sous-famille de l'article"
                             />
                             {errors.asfamille && <span className="error-text">{errors.asfamille}</span>}
                         </div>
-                        <div className="form-group">
-                            <button type="button" className="btn btn-primary" onClick={nextStep}>
-                                Suivant
-                            </button>
-                        </div>
+
+                        <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={nextStep}
+                        >
+                            Suivant
+                        </button>
                     </>
                 )}
-                {step === 2 && (
+                         {step === 2 && (
                     <>
                      <div className="card mb-3">
                             <div className="card-body">
@@ -370,28 +374,20 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
                         <div className="card mb-3">
                         <div className="card-body">
                             <h5>Stock</h5>
-                                <button 
-                                    className="btn btn-primary" 
-                                    onClick={toggleQuantityField}
-                                >
-                                    Suivre la quantité
-                                </button>
-
-                                {isQuantityVisible && (
-                                    <>
-                                        <div className="form-group mt-3">
-                                            <label htmlFor="quantity">Quantité</label>
-                                            <input
-                                                type="number"
-                                                className="form-control"
-                                                name="quantity"
-                                                id="quantity"
-                                                placeholder="Entrez la quantité"
-                                            />
-                                        </div>
-                        
-                                      </>
-                                )}
+                            <div className="form-group mt-3">
+                        <label htmlFor="aqteStock">Quantité</label>
+                        <input
+                            type="number"
+                            className={`form-control ${errors.aqteStock ? 'error-input' : ''}`}
+                            name="aqteStock"
+                            id="aqteStock"
+                            value={values.aqteStock}
+                            onChange={handleInputChange}
+                            placeholder="Entrez la quantité"
+                            min="0" // Assurez-vous que la quantité est un nombre positif
+                        />
+                        {errors.aqteStock && <span className="error-text">{errors.aqteStock}</span>}
+                    </div> 
                          </div>
                      </div>
                      <div className="form-group">

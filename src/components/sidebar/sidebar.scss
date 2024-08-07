@@ -1,0 +1,30 @@
+.sidebar {
+    width:  50px;
+    transition: width 0.3s;
+    overflow: hidden;
+    white-space: nowrap;
+    background-color: #333;
+    height: 100vh;
+    color: #fff;
+  
+    &.open {
+      width: 300px;
+    }
+  
+    .MuiIconButton-root {
+      color: #fff;
+    }
+  
+    .MuiListItem-root {
+      color: #fff;
+  
+      &:hover {
+        background-color: #444;
+      }
+    }
+  
+    .MuiCollapse-root .MuiListItem-root {
+      padding-left: 20px;
+    }
+  }
+  

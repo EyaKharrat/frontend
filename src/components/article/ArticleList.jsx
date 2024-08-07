@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Popup from '../Popup';
 import { Article } from './Article';
+import { Box, Grid, Typography, Card, CardMedia, CardContent, CardActions, Button, Container } from '@mui/material';
 import './Article.css';
 
 function ArticleList() {
@@ -24,20 +25,17 @@ function ArticleList() {
         fetchArticles();
     }, [fetchArticles]);
 
-    // Define the addOrEdit function locally
     const addOrEdit = (article) => {
         if (article.aref) {
-            // Update existing article
             setArticles(articles.map(item => (item.aref === article.aref ? article : item)));
         } else {
-            // Add new article
             setArticles([...articles, article]);
         }
     };
 
     const handleEdit = (article) => {
         setRecordForEdit(article);
-        setOpenPopup(true); // Open the popup for editing
+        setOpenPopup(true);
     };
 
     const handleDelete = async (aref) => {
@@ -52,15 +50,19 @@ function ArticleList() {
     };
 
     const handleAddArticle = () => {
-        navigate('/article'); // Redirect to the article creation page
+        navigate('/article');
     };
 
     return (
-        <div className="container">
-            <h2>Liste des articles</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                <button className="btn btn-primary" onClick={handleAddArticle}>Add Article</button>
-            </div>
+        <Container>
+            <Typography variant="h4" gutterBottom sx={{ mb: 2 }}>
+                Liste des articles
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                <Button variant="contained" color="primary" onClick={handleAddArticle}>
+                    Add Article
+                </Button>
+            </Box>
             {openPopup && (
                 <Popup
                     title={recordForEdit ? 'Edit Article' : 'Add Article'}
@@ -74,50 +76,53 @@ function ArticleList() {
                     />
                 </Popup>
             )}
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th>Référence</th>
-                        <th>Nom</th>
-                        <th>Catégorie</th>
-                        <th>Marques</th>
-                        <th>Image</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {articles.map((article) => (
-                        <tr key={article.aref}>
-                            <td>{article.aref}</td>
-                            <td>{article.adesignation}</td>
-                            <td>{article.afamille}</td>
-                            <td>{article.asfamille}</td>
-                            <td>
-                                <img
-                                    src={article.image || '/img/default.jpg'}
-                                    alt={article.adesignation}
-                                    className="article-image"
-                                />
-                            </td>
-                            <td>
-                                <button
-                                    className="btn btn-warning btn-sm"
-                                    onClick={() => handleEdit(article)}
-                                >
+            <Grid container spacing={2}>
+                {articles.map((article) => (
+                    <Grid item xs={12} sm={6} md={4} key={article.aref}>
+                        <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '8px' }}>
+                            <CardMedia
+                                component="img"
+                                height="150"
+                                image={article.image || '/img/default.jpg'}
+                                alt={article.adesignation}
+                                sx={{ objectFit: 'cover' }}
+                            />
+                            <CardContent sx={{ flexGrow: 1, padding: '8px' }}>
+                                <Typography variant="h6" gutterBottom sx={{ fontSize: '1rem' }}>
+                                    {article.adesignation}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    <strong>Référence:</strong> {article.aref}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    <strong>Catégorie:</strong> {article.afamille}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    <strong>Marques:</strong> {article.asfamille}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    <strong>Prix Achat:</strong> {article.auniteVnt !== null ? `${article.auniteVnt.toFixed(2)} €` : 'N/A'}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    <strong>Prix avec Remise:</strong> {article.aprixVntprom !== null ? `${article.aprixVntprom.toFixed(2)} €` : 'N/A'}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    <strong>Quantité disponible:</strong> {article.aqteStock !== null ? article.aqteStock : 'N/A'}
+                                </Typography>
+                            </CardContent>
+                            <CardActions sx={{ justifyContent: 'flex-end', padding: '8px' }}>
+                                <Button size="small" color="primary" onClick={() => handleEdit(article)}>
                                     Modifier
-                                </button>
-                                <button
-                                    className="btn btn-danger btn-sm"
-                                    onClick={() => handleDelete(article.aref)}
-                                >
+                                </Button>
+                                <Button size="small" color="error" onClick={() => handleDelete(article.aref)}>
                                     Supprimer
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+                                </Button>
+                            </CardActions>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
+        </Container>
     );
 }
 

@@ -1,6 +1,22 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import {
+  Avatar,
+  Button,
+  TextField,
+  Link,
+  Grid,
+  Box,
+  Typography,
+  Container,
+  CircularProgress,
+  Alert,
+} from '@mui/material';
+import { LockOutlined as LockOutlinedIcon } from '@mui/icons-material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+const theme = createTheme();
 
 const Registre = () => {
   const initialFormData = {
@@ -55,21 +71,23 @@ const Registre = () => {
       setErrors(validationErrors);
       return;
     }
-
+  
     try {
       setLoading(true);
       setError(null);
-
+  
       const requestData = {
         Name: formData.Name,
         Email: formData.Email,
         Password: formData.Password,
         ConfirmPassword: formData.ConfirmPassword
       };
-
+  
       const response = await axios.post("https://localhost:7029/api/Account/register", requestData);
-
+  
       if (response.status === 200) {
+        // Store the user name in local storage
+        localStorage.setItem('userName', formData.Name);
         alert("Registration Successful");
         setFormData(initialFormData);
         setErrors({});
@@ -83,98 +101,104 @@ const Registre = () => {
       setLoading(false);
     }
   };
-
+  
   return (
-    <div className="container mt-4" style={{ maxWidth: '500px' }}>
-      <div className="card shadow">
-        <div className="card-body">
-          <h5 className="card-title text-center mb-4">Registre</h5>
-          <form onSubmit={save}>
-            <div className="form-group mb-4">
-              <label htmlFor="Name">Your Name</label>
-              <input
-                type="text"
-                id="Name"
-                className={`form-control ${errors.Name ? 'is-invalid' : ''}`}
-                name="Name"
-                value={formData.Name}
-                onChange={handleChange}
-                required
-              />
-              {errors.Name && <div className="invalid-feedback">{errors.Name}</div>}
-            </div>
-
-            <div className="form-group mb-4">
-              <label htmlFor="Email">Your Email</label>
-              <input
-                type="email"
-                id="Email"
-                className={`form-control ${errors.Email ? 'is-invalid' : ''}`}
-                name="Email"
-                value={formData.Email}
-                onChange={handleChange}
-                required
-              />
-              {errors.Email && <div className="invalid-feedback">{errors.Email}</div>}
-            </div>
-
-            <div className="form-group mb-4">
-              <label htmlFor="Password">Password</label>
-              <input
-                type="password"
-                id="Password"
-                className={`form-control ${errors.Password ? 'is-invalid' : ''}`}
-                name="Password"
-                value={formData.Password}
-                onChange={handleChange}
-                required
-              />
-              {errors.Password && <div className="invalid-feedback">{errors.Password}</div>}
-            </div>
-
-            <div className="form-group mb-4">
-              <label htmlFor="ConfirmPassword">Repeat your password</label>
-              <input
-                type="password"
-                id="ConfirmPassword"
-                className={`form-control ${errors.ConfirmPassword ? 'is-invalid' : ''}`}
-                name="ConfirmPassword"
-                value={formData.ConfirmPassword}
-                onChange={handleChange}
-                required
-              />
-              {errors.ConfirmPassword && <div className="invalid-feedback">{errors.ConfirmPassword}</div>}
-            </div>
-
-            <div className="form-check mb-4">
-              <input className="form-check-input" type="checkbox" value="" id="form2Example3cg" required />
-              <label className="form-check-label" htmlFor="form2Example3cg">
-                I agree to all statements in <a href="#!" className="text-body"><u>Terms of service</u></a>
-              </label>
-            </div>
-
-            <div className="text-center">
-              <button
-                type="submit"
-                className="btn btn-success btn-lg"
-                disabled={loading}
-              >
-                {loading ? 'Loading...' : 'Register'}
-              </button>
-            </div>
-
-            {error && <p className="text-danger mt-3">{error}</p>}
-
-            <p className="text-center text-muted mt-4 mb-0">
-              Already have an account?{' '}
-              <a href="#!" onClick={() => navigate('/login')} className="fw-bold text-body">
-                <u>Login here</u>
-              </a>
-            </p>
-          </form>
-        </div>
-      </div>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Container component="main" maxWidth="xs">
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign Up
+          </Typography>
+          {error && (
+            <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
+              {error}
+            </Alert>
+          )}
+          <Box component="form" onSubmit={save} noValidate sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="Name"
+              label="Name"
+              name="Name"
+              autoComplete="name"
+              autoFocus
+              value={formData.Name}
+              onChange={handleChange}
+              error={Boolean(errors.Name)}
+              helperText={errors.Name}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="Email"
+              label="Email Address"
+              name="Email"
+              autoComplete="email"
+              value={formData.Email}
+              onChange={handleChange}
+              error={Boolean(errors.Email)}
+              helperText={errors.Email}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="Password"
+              label="Password"
+              type="password"
+              id="Password"
+              autoComplete="current-password"
+              value={formData.Password}
+              onChange={handleChange}
+              error={Boolean(errors.Password)}
+              helperText={errors.Password}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="ConfirmPassword"
+              label="Confirm Password"
+              type="password"
+              id="ConfirmPassword"
+              value={formData.ConfirmPassword}
+              onChange={handleChange}
+              error={Boolean(errors.ConfirmPassword)}
+              helperText={errors.ConfirmPassword}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} /> : 'Sign Up'}
+            </Button>
+            <Grid container justifyContent="flex-end">
+              <Grid item>
+                <Link href="/login" variant="body2">
+                  Already have an account? Sign in
+                </Link>
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
+      </Container>
+    </ThemeProvider>
   );
 };
 

@@ -1,0 +1,26 @@
+.navbar {
+  height: 50px;
+  background-color: #e9e6e6 !important; /* Couleur de fond grise */
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+}
+
+.title {
+  flex-grow: 1;
+}
+
+.profile-menu {
+  display: flex;
+  margin-left: auto; /* Aligne le menu de profil à droite */
+  color: black;
+}
+
+.profile-menu .menu-icon {
+  margin-right: 8px;
+  color: black;
+}
+
+.profile-menu .menu-item-text {
+  margin-left: 8px;
+}

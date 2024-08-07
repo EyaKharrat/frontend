@@ -51,6 +51,14 @@ const ClientList = () => {
         }
     };
 
+    const handleAction = (client, action) => {
+        if (action === 'edit') {
+            handleEdit(client);
+        } else if (action === 'delete') {
+            handleDelete(client.cref);
+        }
+    };
+
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -65,7 +73,6 @@ const ClientList = () => {
     };
 
     const filteredClients = clients.filter(client =>
-    
         client.typeC.toLowerCase().includes(searchQuery.toLowerCase()) ||
         client.cnom.toLowerCase().includes(searchQuery.toLowerCase()) ||
         client.cprenom.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -81,7 +88,7 @@ const ClientList = () => {
                 <Button
                     variant="outlined"
                     onClick={handleClickOpen}
-                    style={{  height: '40px' }}
+                    style={{ height: '40px' }}
                 >
                     <IoMdPersonAdd /> Add Client
                 </Button>
@@ -121,8 +128,7 @@ const ClientList = () => {
                         <th>Adresse</th>
                         <th>Matricule Fiscale</th>
                         <th>Raison Sociale</th>
-                        <th>Modifier</th>
-                        <th>Supprimer</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -136,10 +142,20 @@ const ClientList = () => {
                             <td>{client.cmatFiscal}</td>
                             <td>{client.craisonSocial}</td>
                             <td>
-                                <button onClick={() => handleEdit(client)} className="btn btn-warning btn-sm mr-2"><CiEdit /></button>
-                            </td>
-                            <td>
-                                <button onClick={() => handleDelete(client.cref)} className="btn btn-danger btn-sm"><AiOutlineUserDelete /></button>
+                                <div>
+                                    <button 
+                                        onClick={() => handleAction(client, 'edit')} 
+                                        className="btn btn-warning btn-sm"
+                                    >
+                                        <CiEdit />
+                                    </button>
+                                    <button 
+                                        onClick={() => handleAction(client, 'delete')} 
+                                        className="btn btn-danger btn-sm"
+                                    >
+                                        <AiOutlineUserDelete />
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     ))}

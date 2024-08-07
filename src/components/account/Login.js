@@ -1,7 +1,11 @@
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Avatar,Button,TextField,FormControlLabel,Checkbox,Link,Grid,Box,Typography, Container,CircularProgress,Alert,} from '@mui/material';
+import { LockOutlined as LockOutlinedIcon } from '@mui/icons-material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+const theme = createTheme();
 
 const Login = ({ handleLogin }) => {
   const navigate = useNavigate();
@@ -84,79 +88,90 @@ const Login = ({ handleLogin }) => {
   };
 
   return (
-    <div>
-      <section style={{ backgroundColor: '#f0f0f0' }}>
-        <div className="container py-5 h-100">
-          <div className="row d-flex justify-content-center align-items-center h-100">
-            <div className="col-12 col-md-8 col-lg-6 col-xl-5">
-              <div className="card shadow-2-strong" style={{ borderRadius: '1rem' }}>
-                <div className="card-body p-5 text-center">
-                  <h3 className="mb-5">Sign in</h3>
-                  <form onSubmit={handleSubmit}>
-                    <div className="form-outline mb-4">
-                      <input
-                        type="email"
-                        id="typeEmailX-2"
-                        className={`form-control form-control-lg ${errors.email ? 'is-invalid' : ''}`}
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                      />
-                      <label className="form-label" htmlFor="typeEmailX-2">Email</label>
-                      {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-                    </div>
-                    <div className="form-outline mb-4">
-                      <input
-                        type="password"
-                        id="typePasswordX-2"
-                        className={`form-control form-control-lg ${errors.password ? 'is-invalid' : ''}`}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                      />
-                      <label className="form-label" htmlFor="typePasswordX-2">Password</label>
-                      {errors.password && <div className="invalid-feedback">{errors.password}</div>}
-                    </div>
-                    <div className="form-check d-flex justify-content-start mb-4">
-                      <input className="form-check-input" type="checkbox" value="" id="form1Example3" />
-                      <label className="form-check-label" htmlFor="form1Example3"> Remember password </label>
-                    </div>
-                    <button
-                      className="btn btn-primary btn-lg btn-block"
-                      type="submit"
-                      disabled={loading}
-                    >
-                      {loading ? 'Logging in...' : 'Login'}
-                    </button>
-                  </form>
-                  {loginSuccessMessage && <p className="text-success mt-3">{loginSuccessMessage}</p>}
-                  {errors.general && <p className="text-danger mt-3">{errors.general}</p>}
-                  <hr className="my-4" />
-                  <button
-                    className="btn btn-lg btn-block mb-2"
-                    style={{ backgroundColor: '#dd4b39', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}
-                    type="button"
-                    onClick={() => window.location.href = 'https://accounts.google.com/signin'}
-                  >
-                    <i className="fab fa-google me-2" style={{ color: 'white' }}></i> Sign in with Google
-                  </button>
-                  <button
-                    className="btn btn-lg btn-block"
-                    style={{ backgroundColor: '#3b5998', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}
-                    type="button"
-                    onClick={() => window.location.href = 'https://www.facebook.com/login'}
-                  >
-                    <i className="fab fa-facebook-f me-2" style={{ color: 'white' }}></i> Sign in with Facebook
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Container component="main" maxWidth="xs">
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign in
+          </Typography>
+          {loginSuccessMessage && (
+            <Alert severity="success" sx={{ width: '100%', mt: 2 }}>
+              {loginSuccessMessage}
+            </Alert>
+          )}
+          {errors.general && (
+            <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
+              {errors.general}
+            </Alert>
+          )}
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={formData.email}
+              onChange={handleChange}
+              error={Boolean(errors.email)}
+              helperText={errors.email}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={formData.password}
+              onChange={handleChange}
+              error={Boolean(errors.password)}
+              helperText={errors.password}
+            />
+            <FormControlLabel
+              control={<Checkbox value="remember" color="primary" />}
+              label="Remember me"
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} /> : 'Sign In'}
+            </Button>
+            <Grid container>
+              <Grid item xs>
+                <Link href="#" variant="body2">
+                  Forgot password?
+                </Link>
+              </Grid>
+              <Grid item>
+                <Link href="#" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
+      </Container>
+    </ThemeProvider>
   );
 };
 
