@@ -10,7 +10,7 @@ const Logout = () => {
     localStorage.removeItem("token");
 
     // Rediriger vers la page de connexion après la déconnexion
-    navigate("/login");
+    navigate("/");
   }, [navigate]);
 
   return (

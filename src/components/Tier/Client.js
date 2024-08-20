@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaBuilding, FaArrowRight } from 'react-icons/fa';
+import { Button, TextField, FormControl, FormControlLabel, RadioGroup, Radio, FormLabel, Card, CardContent, CardActions, Typography } from '@mui/material';
+import { addClient, updateClient } from './clientService'; 
 
 export const Client = ({ recordForEdit, addOrEdit, onClose }) => {
     const navigate = useNavigate();
@@ -21,6 +21,8 @@ export const Client = ({ recordForEdit, addOrEdit, onClose }) => {
         cmatFiscal: '',
         rc: ''
     });
+
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (recordForEdit) {
@@ -45,10 +47,10 @@ export const Client = ({ recordForEdit, addOrEdit, onClose }) => {
         }
     }, [recordForEdit]);
 
-    const handleClientTypeChange = (type) => {
+    const handleClientTypeChange = (event) => {
         setFormData(prevState => ({
             ...prevState,
-            typeC: type
+            typeC: event.target.value
         }));
     };
 
@@ -60,37 +62,50 @@ export const Client = ({ recordForEdit, addOrEdit, onClose }) => {
         }));
     };
 
+    const validate = () => {
+        let tempErrors = {};
+
+        if (!formData.typeC) tempErrors.typeC = "Veuillez sélectionner un type de client.";
+        if (formData.typeC === 'Personne Physique') {
+            if (!formData.cnom) tempErrors.cnom = "Le nom est requis.";
+            if (!formData.cprenom) tempErrors.cprenom = "Le prénom est requis.";
+            if (!formData.ccin) tempErrors.ccin = "Le CIN est requis.";
+            if (!formData.fax) tempErrors.fax = "Le fax est requis.";
+        } else if (formData.typeC === 'Société') {
+            if (!formData.craisonSocial) tempErrors.craisonSocial = "La raison sociale est requise.";
+            if (!formData.cmatFiscal) tempErrors.cmatFiscal = "Le matricule fiscal est requis.";
+            if (!formData.rc) tempErrors.rc = "Le numéro RC est requis.";
+        }
+
+        if (!formData.tel) tempErrors.tel = "Le téléphone est requis.";
+        if (!formData.cadresse) tempErrors.cadresse = "L'adresse est requise.";
+        if (!formData.cville) tempErrors.cville = "La ville est requise.";
+        if (!formData.cpays) tempErrors.cpays = "Le pays est requis.";
+        if (!formData.ccodePostal) tempErrors.ccodePostal = "Le code postal est requis.";
+
+        setErrors(tempErrors);
+
+        return Object.keys(tempErrors).length === 0;
+    };
+
     const handleSubmit = async (event) => {
         event.preventDefault();
+    
+        if (!validate()) return;
+    
         try {
-            let newClient;
+            const { cref, ...dataToSend } = formData;
+            
             if (recordForEdit) {
-                await axios.put(`https://localhost:7029/api/Tiers/UpdateTier/${formData.cref}`, formData);
+                await updateClient(cref, formData);
                 alert('Client updated successfully!');
-                newClient = formData;
             } else {
-                const data = {
-                    typeC: formData.typeC,
-                    cnom: formData.cnom,
-                    cprenom: formData.cprenom,
-                    ccin: formData.ccin,
-                    fax: formData.fax,
-                    tel: formData.tel,
-                    cadresse: formData.cadresse,
-                    cville: formData.cville,
-                    cpays: formData.cpays,
-                    ccodePostal: formData.ccodePostal,
-                    craisonSocial: formData.craisonSocial,
-                    cmatFiscal: formData.cmatFiscal,
-                    rc: formData.rc
-                };
-                const response = await axios.post('https://localhost:7029/api/Tiers/AddTier', data);
-                newClient = response.data;
+                await addClient(dataToSend);
                 alert('Client added successfully!');
                 navigate('/clientlist');
             }
-            addOrEdit(newClient); // Call addOrEdit with the newly added or updated client
-            if (onClose) onClose(); // Call onClose if provided
+            addOrEdit(formData);
+            if (onClose) onClose();
         } catch (error) {
             console.error('There was an error submitting the form!', error);
         }
@@ -98,236 +113,188 @@ export const Client = ({ recordForEdit, addOrEdit, onClose }) => {
 
     return (
         <div className="container mt-3">
-            <form onSubmit={handleSubmit}>
-                <div className="card">
-                    <div className="card-header">
-                        <div className="d-flex align-items-center">
-                            <FaArrowRight size={20} className="mr-2" />
-                            <span>{recordForEdit ? 'Edit Client' : 'Nouveau(-elle) client(e)'}</span>
+            <Card>
+                <CardContent>
+                    <Typography variant="h6" component="div" sx={{ mb: 2 }}>
+                        {recordForEdit ? 'Edit Client' : 'Nouveau(-elle) client(e)'}
+                    </Typography>
+                    <FormControl component="fieldset" error={Boolean(errors.typeC)}>
+                        <FormLabel component="legend">Type de Client</FormLabel>
+                        <RadioGroup
+                            row
+                            name="typeC"
+                            value={formData.typeC}
+                            onChange={handleClientTypeChange}
+                        >
+                            <FormControlLabel 
+                                value="Personne Physique"
+                                control={<Radio />} 
+                                label="Personne Physique" 
+                            />
+                            <FormControlLabel 
+                                value="Société"
+                                control={<Radio />} 
+                                label="Société" 
+                            />
+                        </RadioGroup>
+                        {errors.typeC && <Typography color="error">{errors.typeC}</Typography>}
+                    </FormControl>
+                    {formData.typeC === 'Personne Physique' && (
+                        <div>
+                            <TextField
+                                label="Nom"
+                                name="cnom"
+                                value={formData.cnom}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                error={Boolean(errors.cnom)}
+                                helperText={errors.cnom}
+                            />
+                            <TextField
+                                label="Prénom"
+                                name="cprenom"
+                                value={formData.cprenom}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                error={Boolean(errors.cprenom)}
+                                helperText={errors.cprenom}
+                            />
+                            <TextField
+                                label="CIN"
+                                name="ccin"
+                                value={formData.ccin}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                error={Boolean(errors.ccin)}
+                                helperText={errors.ccin}
+                            />
+                            <TextField
+                                label="Fax"
+                                name="fax"
+                                value={formData.fax}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                error={Boolean(errors.fax)}
+                                helperText={errors.fax}
+                            />
+                            <TextField
+                                label="Téléphone Personnel"
+                                name="tel"
+                                value={formData.tel}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                error={Boolean(errors.tel)}
+                                helperText={errors.tel}
+                            />
                         </div>
-                    </div>
-                    <div className="card-body">
-                        <div className="row mb-3">
-                            <div className="col text-center">
-                                <FaUser 
-                                    size={30} 
-                                    onClick={() => handleClientTypeChange('Personne Physique')}
-                                    className={formData.typeC === 'Personne Physique' ? 'text-primary' : 'text-muted'}
-                                    style={{ cursor: 'pointer', marginRight: '20px' }}
-                                />
-                                <FaBuilding 
-                                    size={30} 
-                                    onClick={() => handleClientTypeChange('Société')}
-                                    className={formData.typeC === 'Société' ? 'text-primary' : 'text-muted'}
-                                    style={{ cursor: 'pointer' }}
-                                />
-                            </div>
+                    )}
+                    {formData.typeC === 'Société' && (
+                        <div>
+                            <TextField
+                                label="Raison Sociale"
+                                name="craisonSocial"
+                                value={formData.craisonSocial}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                error={Boolean(errors.craisonSocial)}
+                                helperText={errors.craisonSocial}
+                            />
+                            <TextField
+                                label="Matricule Fiscale"
+                                name="cmatFiscal"
+                                value={formData.cmatFiscal}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                error={Boolean(errors.cmatFiscal)}
+                                helperText={errors.cmatFiscal}
+                            />
+                            <TextField
+                                label="RC"
+                                name="rc"
+                                value={formData.rc}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                                error={Boolean(errors.rc)}
+                                helperText={errors.rc}
+                            />
+                            <TextField
+                                label="Téléphone Bureau"
+                                name="tel"
+                                value={formData.tel}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="normal"
+                            />
                         </div>
-                        {formData.typeC && (
-                            <>
-                                {formData.typeC === 'Personne Physique' && (
-                                    <div className="row mb-3">
-                                        <div className="col-sm-12">
-                                            <div className="card">
-                                                <div className="card-body">
-                                                    <div className="row mb-3">
-                                                        <div className="col">
-                                                            <label htmlFor="Cnom">Nom</label>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                id="Cnom"
-                                                                name="cnom"
-                                                                value={formData.cnom}
-                                                                onChange={handleChange}
-                                                            />
-                                                        </div>
-                                                        <div className="col">
-                                                            <label htmlFor="Cprenom">Prénom</label>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                id="Cprenom"
-                                                                placeholder="Prénom"
-                                                                name="cprenom"
-                                                                value={formData.cprenom}
-                                                                onChange={handleChange}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="row mb-3">
-                                                        <div className="col">
-                                                            <label htmlFor="Ccin">CIN</label>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                id="Ccin"
-                                                                placeholder="CIN"
-                                                                name="ccin"
-                                                                value={formData.ccin}
-                                                                onChange={handleChange}
-                                                            />
-                                                        </div>
-                                                        <div className="col">
-                                                            <label htmlFor="Fax">Fax</label>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                id="Fax"
-                                                                placeholder="Fax"
-                                                                name="fax"
-                                                                value={formData.fax}
-                                                                onChange={handleChange}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="mb-3">
-                                                        <label htmlFor="Tel">Téléphone Personnel</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            id="Tel"
-                                                            placeholder="Téléphone Personnel"
-                                                            name="tel"
-                                                            value={formData.tel}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                                {formData.typeC === 'Société' && (
-                                    <div className="row mb-3">
-                                        <div className="col-sm-12">
-                                            <div className="card">
-                                                <div className="card-body">
-                                                    <div className="mb-3">
-                                                        <label htmlFor="CraisonSocial">Raison Sociale</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            id="CraisonSocial"
-                                                            placeholder="Raison Sociale"
-                                                            name="craisonSocial"
-                                                            value={formData.craisonSocial}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </div>
-                                                    <div className="row mb-3">
-                                                        <div className="col">
-                                                            <label htmlFor="CmatFiscal">Matricule Fiscale</label>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                id="CmatFiscal"
-                                                                placeholder="Matricule Fiscale"
-                                                                name="cmatFiscal"
-                                                                value={formData.cmatFiscal}
-                                                                onChange={handleChange}
-                                                            />
-                                                        </div>
-                                                        <div className="col">
-                                                            <label htmlFor="RC">RC</label>
-                                                            <input
-                                                                type="text"
-                                                                className="form-control"
-                                                                id="RC"
-                                                                placeholder="RC"
-                                                                name="rc"
-                                                                value={formData.rc}
-                                                                onChange={handleChange}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="mb-3">
-                                                        <label htmlFor="Tel">Téléphone Bureau</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            id="Tel"
-                                                            placeholder="Téléphone Bureau"
-                                                            name="tel"
-                                                            value={formData.tel}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                                <div className="row">
-                                    <div className="col-sm-12">
-                                        <div className="card">
-                                            <div className="card-body">
-                                                <div className="row mb-3">
-                                                    <div className="col">
-                                                        <label htmlFor="Cville">Ville</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            id="Cville"
-                                                            placeholder="Ville"
-                                                            name="cville"
-                                                            value={formData.cville}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </div>
-                                                    <div className="col">
-                                                        <label htmlFor="Cpays">Pays</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            id="Cpays"
-                                                            placeholder="Pays"
-                                                            name="cpays"
-                                                            value={formData.cpays}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div className="row mb-3">
-                                                    <div className="col">
-                                                        <label htmlFor="CodePostal">Code Postal</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            id="CodePostal"
-                                                            placeholder="Code Postal"
-                                                            name="ccodePostal"
-                                                            value={formData.ccodePostal}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </div>
-                                                    <div className="col">
-                                                        <label htmlFor="Adresse">Adresse</label>
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            id="Adresse"
-                                                            placeholder="Adresse"
-                                                            name="cadresse"
-                                                            value={formData.cadresse}
-                                                            onChange={handleChange}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                    <div className="card-footer text-center">
-                        <button type="submit" className="btn btn-primary">
-                            {recordForEdit ? 'Update' : 'Add'} Client
-                        </button>
-                    </div>
-                </div>
-            </form>
+                    )}
+                    <TextField
+                        label="Adresse"
+                        name="cadresse"
+                        value={formData.cadresse}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="normal"
+                        error={Boolean(errors.cadresse)}
+                        helperText={errors.cadresse}
+                    />
+                    <TextField
+                        label="Ville"
+                        name="cville"
+                        value={formData.cville}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="normal"
+                        error={Boolean(errors.cville)}
+                        helperText={errors.cville}
+                    />
+                    <TextField
+                        label="Délegation"
+                        name="cpays"
+                        value={formData.cpays}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="normal"
+                        error={Boolean(errors.cpays)}
+                        helperText={errors.cpays}
+                    />
+                    <TextField
+                        label="Code Postal"
+                        name="ccodePostal"
+                        value={formData.ccodePostal}
+                        onChange={handleChange}
+                        fullWidth
+                        margin="normal"
+                        error={Boolean(errors.ccodePostal)}
+                        helperText={errors.ccodePostal}
+                    />
+                </CardContent>
+                <CardActions>
+                    <Button 
+                        variant="contained" 
+                        color="primary" 
+                        onClick={handleSubmit}
+                        fullWidth
+                    >
+                        {recordForEdit ? 'Update' : 'Add'} Client
+                    </Button>
+                    <Button 
+                        variant="outlined" 
+                        color="secondary" 
+                        onClick={onClose} 
+                        fullWidth
+                    >
+                        Cancel
+                    </Button>
+                </CardActions>
+            </Card>
         </div>
     );
 };

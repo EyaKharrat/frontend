@@ -86,12 +86,10 @@ const Registre = () => {
       const response = await axios.post("https://localhost:7029/api/Account/register", requestData);
   
       if (response.status === 200) {
-        // Store the user name in local storage
-        localStorage.setItem('userName', formData.Name);
         alert("Registration Successful");
         setFormData(initialFormData);
         setErrors({});
-        navigate('/login');
+        navigate('/');
       } else {
         setError("Registration Failed");
       }
@@ -190,7 +188,7 @@ const Registre = () => {
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="/login" variant="body2">
+                <Link href="/" variant="body2">
                   Already have an account? Sign in
                 </Link>
               </Grid>

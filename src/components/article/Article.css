@@ -108,6 +108,10 @@
   max-width: 100px; /* Limiter la taille de l'image dans le tableau */
   height: auto;
 }
+.search-container {
+  margin-top: 20px; /* Adjust this value as needed */
+}
+
 
 /* Style pour les boutons d'action */
 .btn-warning, .btn-danger {

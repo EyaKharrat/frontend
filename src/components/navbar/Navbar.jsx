@@ -9,7 +9,7 @@ const Navbar = () => {
   const [anchorElNotify, setAnchorElNotify] = React.useState(null);
 
   // Retrieve the username from local storage
-  const userName = localStorage.getItem('userName');
+  const userName = localStorage.getItem('email');
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);

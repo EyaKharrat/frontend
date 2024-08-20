@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { addArticle, updateArticle } from './articleService';
+import { MenuItem,TextField,Button,Card,CardContent,CircularProgress,InputAdornment,Box,FormControl,FormHelperText,Typography } from '@mui/material';
 
 const initialFieldValues = {
     adesignation: '',
     afamille: '',
     asfamille: '',
+    acategorie:'',
     image: '',
     apuventeHt: '',
     atauxTva: 19, // TVA fixe à 19%
@@ -13,7 +15,7 @@ const initialFieldValues = {
     amarge: '',
     auniteVnt: '',
     apvttc: '',
-    aqteStock:'',
+    aqteStock: '',
     aprixVntprom: ''
 };
 
@@ -21,34 +23,18 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
     const navigate = useNavigate();
     const [values, setValues] = useState(initialFieldValues);
     const [errors, setErrors] = useState({});
-    const [imagePreview, setImagePreview] = useState('/img/up.jpg');
     const [loading, setLoading] = useState(false);
+    const [imagePreview, setImagePreview] = useState('/img/up.jpg');
     const [step, setStep] = useState(1);
-    
+
     useEffect(() => {
         if (recordForEdit) {
-            setValues({
-                adesignation: recordForEdit.adesignation || '',
-                afamille: recordForEdit.afamille || '',
-                asfamille: recordForEdit.asfamille || '',
-                image: recordForEdit.image || '',
-                apuventeHt: recordForEdit.apuventeHt || '',
-                atauxTva: recordForEdit.atauxTva || 19,
-                amarge: recordForEdit.amarge || '',
-                apvttc: recordForEdit.apvttc || '',
-                aremise: recordForEdit.aremise || '',
-                aprixVntprom: recordForEdit.aprixVntprom || '',
-                auniteVnt: recordForEdit.auniteVnt || '',
-                aqteStock: recordForEdit.aqteStock || '',
-            });
+            setValues({ ...recordForEdit });
             setImagePreview(recordForEdit.image || '/img/up.jpg');
-        } else {
-            setValues(initialFieldValues);
-            setImagePreview('/img/up.jpg');
         }
     }, [recordForEdit]);
 
-    const calculateValues = (apuventeHt, amarge, apvttc, aremise,auniteVnt) => {
+    const calculateValues = (apuventeHt, amarge, apvttc, aremise, auniteVnt) => {
         let priceAfterDiscount = '';
 
         if (apuventeHt) {
@@ -72,9 +58,9 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
         const { apvttc, auniteVnt, priceAfterDiscount } = calculateValues(values.apuventeHt, values.amarge, values.apvttc, values.aremise);
         setValues(prev => ({
             ...prev,
-            apvttc: apvttc,
+            apvttc,
             aprixVntprom: priceAfterDiscount,
-            auniteVnt: auniteVnt
+            auniteVnt
         }));
     }, [values.apuventeHt, values.amarge, values.apvttc, values.aremise]);
 
@@ -106,22 +92,23 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
             setImagePreview('/img/up.jpg');
         }
     };
-    
+
     const validate = () => {
         let temp = {};
         temp.adesignation = values.adesignation !== '';
         temp.afamille = values.afamille !== '';
         temp.asfamille = values.asfamille !== '';
+        temp.acategorie = values.acategorie !== '';
         temp.image = values.image !== '' || recordForEdit;
-    
+
         setErrors({
             adesignation: temp.adesignation ? '' : 'Ce champ est requis.',
             afamille: temp.afamille ? '' : 'Ce champ est requis.',
             asfamille: temp.asfamille ? '' : 'Ce champ est requis.',
+            acategorie: temp.acategorie ? '' : 'Ce champ est requis.',
             image: temp.image ? '' : "L'image est requise.",
         });
-    
-        console.log(Object.values(temp));
+
         return Object.values(temp).every(x => x);
     };
 
@@ -129,38 +116,20 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
         event.preventDefault();
         if (validate()) {
             setLoading(true);
-            const formData = {
-                adesignation: values.adesignation,
-                afamille: values.afamille,
-                asfamille: values.asfamille,
-                image: values.image,
-                apuventeHt: values.apuventeHt,
-                atauxTva: values.atauxTva,
-                amarge: values.amarge,
-                apvttc: values.apvttc,
-                aremise: values.aremise,
-                aprixVntprom: values.aprixVntprom,
-                auniteVnt: values.auniteVnt,
-                aqteStock: values.aqteStock,
-            };
-            console.log("Submitting form with data:", formData);
-
             try {
                 let newArticle;
                 if (recordForEdit) {
-                    await axios.put(`https://localhost:7029/api/Articles/${recordForEdit.aref}`, formData);
+                    newArticle = await updateArticle(recordForEdit.aref, values);
                     alert('Article mis à jour avec succès!');
-                    newArticle = { ...recordForEdit, ...values };
                 } else {
-                    await axios.post('https://localhost:7029/api/Articles', formData);
+                    newArticle = await addArticle(values);
                     alert('Article ajouté avec succès!');
-                    newArticle = { ...values };
                     navigate('/articlelist');
                 }
                 addOrEdit(newArticle);
                 onClose();
             } catch (error) {
-                console.error('Il y a eu une erreur lors de la soumission du formulaire!', error);
+                console.error('Error during form submission', error);
             } finally {
                 setLoading(false);
             }
@@ -176,236 +145,275 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
     const previousStep = () => {
         setStep(step - 1);
     };
-   
 
     const formContainerStyle = {
-        maxWidth: '600px', // Adjust the max width
-        margin: '20px auto', // Center the form horizontally
-        padding: '20px', // Add padding for better appearance
-        border: '1px solid #ccc', // Add a border
-        borderRadius: '8px', // Add rounded corners
-        boxShadow: '0 0 10px rgba(0,0,0,0.1)', // Add a subtle shadow
-        backgroundColor: '#fff', // White background
+        maxWidth: '600px',
+        margin: '20px auto',
+        padding: '20px',
+        border: '1px solid #e0e0e0',
+        borderRadius: '8px',
+        boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+        backgroundColor: '#ffffff',
     };
 
     return (
         <div style={formContainerStyle}>
-            <form className="form" autoComplete="off" onSubmit={handleFormSubmit}>
+            <form autoComplete="off" onSubmit={handleFormSubmit}>
                 {step === 1 && (
                     <>
-                        <div className="form-group">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                className="form-control-file"
-                                onChange={showPreview}
-                            />
-                            <div className="card-img-top-container">
-                                {imagePreview && (
-                                    <img
-                                        src={imagePreview}
-                                        className="card-img-top"
-                                        alt="Article"
-                                        style={{ maxWidth: '100%', height: 'auto' }}
-                                    />
-                                )}
-                            </div>
-                            {errors.image && <span className="error-text">{errors.image}</span>}
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="adesignation">Catégorie</label>
-                            <select
-                                className={`form-control ${errors.adesignation ? 'error-input' : ''}`}
-                                name="adesignation"
-                                value={values.adesignation}
-                                onChange={handleInputChange}
-                            >
-                                 <option value="">Sélectionnez une désignation</option>
-                                <option value="Jeux et jouets">Jeux et jouets</option>
-                                <option value="Animaux et articles pour animaux de compagnie">Animaux et articles pour animaux de compagnie</option>
-                                <option value="Véhicules et accessoires">Véhicules et accessoires</option>
-                                <option value="Vêtements et accessoires">Vêtements et accessoires</option>
-                                <option value="Arts et loisirs">Arts et loisirs</option>
-                                <option value="Bébés et tout petits">Bébés et tout petits</option>
-                                <option value="Entreprise et industrie">Entreprise et industrie</option>
-                                <option value="Appareils photo, caméra et instruments d'optique">Appareils photo, caméra et instruments d'optique</option>
-                                <option value="Appareils électroniques">Appareils électroniques</option>
-                                <option value="Alimentation, boissons et tabac">Alimentation, boissons et tabac</option>
-                                <option value="Meubles">Meubles</option>
-                                <option value="Quincaillerie">Quincaillerie</option>
-                                <option value="Santé et beauté">Santé et beauté</option>
-                                <option value="Maison et jardin">Maison et jardin</option>
-                                <option value="Adultes">Adultes</option>
-                                <option value="Médias">Médias</option>
-                                <option value="Fourniture de bureau">Fourniture de bureau</option>
-                                <option value="Offices religieux et cérémonies">Offices religieux et cérémonies</option>
-                                <option value="Logiciels">Logiciels</option>
-                                <option value="Équipements sportifs">Équipements sportifs</option>
-                                <option value="Modules complémentaires du produit">Modules complémentaires du produit</option>
-                                <option value="Services">Services</option>
-                                <option value="Carte cadeaux">Carte cadeaux</option>
-                                <option value="Non classé">Non classé</option>
-                            </select>
-                            {errors.adesignation && <span className="error-text">{errors.adesignation}</span>}
-                        </div>
+                     <Typography variant="h6" component="div" sx={{ mb: 2 }}>
+                        {recordForEdit ? 'Edit Article' : 'Nouveau(-el) Article'}
+                    </Typography>
+                        <FormControl fullWidth margin="normal">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    style={{ display: 'none' }}
+                                    id="image-upload"
+                                    onChange={showPreview}
+                                />
+                                <label htmlFor="image-upload">
+                                    <Button variant="contained" component="span" fullWidth>
+                                        Télécharger une image
+                                    </Button>
+                                </label>
+                                <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                                    {imagePreview && (
+                                        <img
+                                            src={imagePreview}
+                                            alt="Article"
+                                            style={{ maxWidth: '40%', height: '50%' }}
+                                        />
+                                    )}
+                                </div>
+                                {errors.image && <FormHelperText error>{errors.image}</FormHelperText>}
+                            </FormControl>
+                            <TextField
+                                    fullWidth
+                                    margin="normal"
+                                    label="Catégorie"
+                                    name="acategorie"
+                                    value={values.acategorie}
+                                    onChange={handleInputChange}
+                                    select
+                                    variant="outlined"
+                                    helperText={errors.acategorie}
+                                    error={!!errors.acategorie}
+                                >
+                                    <MenuItem value="">Sélectionnez une désignation</MenuItem>
+                                    <MenuItem value="Jeux et jouets">Jeux et jouets</MenuItem>
+                                    <MenuItem value="Animaux et articles pour animaux de compagnie">Animaux et articles pour animaux de compagnie</MenuItem>
+                                    <MenuItem value="Véhicules et accessoires">Véhicules et accessoires</MenuItem>
+                                    <MenuItem value="Vêtements et accessoires">Vêtements et accessoires</MenuItem>
+                                    <MenuItem value="Arts et loisirs">Arts et loisirs</MenuItem>
+                                    <MenuItem value="Bébés et tout petits">Bébés et tout petits</MenuItem>
+                                    <MenuItem value="Entreprise et industrie">Entreprise et industrie</MenuItem>
+                                    <MenuItem value="Appareils photo, caméra et instruments d'optique">Appareils photo, caméra et instruments d'optique</MenuItem>
+                                    <MenuItem value="Appareils électroniques">Appareils électroniques</MenuItem>
+                                    <MenuItem value="Alimentation, boissons et tabac">Alimentation, boissons et tabac</MenuItem>
+                                    <MenuItem value="Meubles">Meubles</MenuItem>
+                                    <MenuItem value="Informatique">Informatique</MenuItem>
+                                    <MenuItem value="Quincaillerie">Quincaillerie</MenuItem>
+                                    <MenuItem value="Santé et beauté">Santé et beauté</MenuItem>
+                                    <MenuItem value="Maison et jardin">Maison et jardin</MenuItem>
+                                    <MenuItem value="Adultes">Adultes</MenuItem>
+                                    <MenuItem value="Médias">Médias</MenuItem>
+                                    <MenuItem value="Fourniture de bureau">Fourniture de bureau</MenuItem>
+                                    <MenuItem value="Offices religieux et cérémonies">Offices religieux et cérémonies</MenuItem>
+                                    <MenuItem value="Logiciels">Logiciels</MenuItem>
+                                    <MenuItem value="Équipements sportifs">Équipements sportifs</MenuItem>
+                                    <MenuItem value="Modules complémentaires du produit">Modules complémentaires du produit</MenuItem>
+                                    <MenuItem value="Services">Services</MenuItem>
+                                    <MenuItem value="Carte cadeaux">Carte cadeaux</MenuItem>
+                                    <MenuItem value="Non classé">Non classé</MenuItem>
+                                </TextField>
+                            <TextField
+                               fullWidth
+                               margin="normal"
+                               label="Type-Article"
+                               name="afamille"
+                               value={values.afamille}
+                               onChange={handleInputChange}
+                               variant="outlined"
+                               helperText={errors.afamille}
+                               error={!!errors.afamille}
+                           />
 
-                        <div className="form-group">
-                            <label htmlFor="afamille">Famille</label>
-                            <input
-                                className={`form-control ${errors.afamille ? 'error-input' : ''}`}
-                                name="afamille"
-                                value={values.afamille}
-                                onChange={handleInputChange}
-                            />
-                            {errors.afamille && <span className="error-text">{errors.afamille}</span>}
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="asfamille">Sous-Famille</label>
-                            <input
-                                className={`form-control ${errors.asfamille ? 'error-input' : ''}`}
+                            <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Nom-Article"
                                 name="asfamille"
                                 value={values.asfamille}
                                 onChange={handleInputChange}
+                                variant="outlined"
+                                helperText={errors.asfamille}
+                                error={!!errors.asfamille}
                             />
-                            {errors.asfamille && <span className="error-text">{errors.asfamille}</span>}
-                        </div>
-
-                        <button
-                            type="button"
-                            className="btn btn-primary"
-                            onClick={nextStep}
-                        >
-                            Suivant
-                        </button>
+                           <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Désingation"
+                                name="adesignation"
+                                value={values.description}
+                                onChange={handleInputChange}
+                                variant="outlined"
+                                helperText={errors.adesignation}
+                                error={!!errors.adesignation}
+                            />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={nextStep}
+                                fullWidth
+                                sx={{ marginTop: 2 }}
+                            >
+                                Suivant
+                            </Button>
                     </>
                 )}
-                         {step === 2 && (
+                {step === 2 && (
                     <>
-                     <div className="card mb-3">
-                            <div className="card-body">
-                            <h5>Prix de l'article</h5>
-                                <div className="row">
-                                    <div className="form-group col-md-4">
-                                        <label htmlFor="apuventeHt">Prix de vente HT</label>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            name="apuventeHt"
-                                            value={values.apuventeHt}
-                                            onChange={handleInputChange}
-                                            placeholder="Entrez le prix de vente HT"
-                                        />
-                                    </div>
-                                    <div className="form-group col-md-4">
-                                        <label>TxTVA</label>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            name="atauxTva"
-                                            value={values.atauxTva}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
-                                    <div className="form-group col-md-4">
-                                        <label htmlFor="apvttc">Total TTC</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="apvttc"
-                                            value={values.apvttc}
-                                            readOnly
-                                            placeholder="prix total TTC"
-                                        />
-                                    </div>
-                                </div>
+                        <Typography variant="h6" component="div" sx={{ mb: 2 }}>
+                            Informations sur les prix
+                        </Typography>
+                                <Card sx={{ mb: 3 }}>
+                                <CardContent>
+                                    <h5>Prix de l'article</h5>
+                                    <TextField
+                                        fullWidth
+                                        margin="normal"
+                                        label="Prix de vente HT"
+                                        name="apuventeHt"
+                                        type="number"
+                                        value={values.apuventeHt}
+                                        onChange={handleInputChange}
+                                        variant="outlined"
+                                        InputProps={{
+                                            startAdornment: <InputAdornment position="start">dt</InputAdornment>,
+                                        }}
+                                    />
 
-                                <div className="row">
-                                    <div className="form-group col-md-6">
-                                        <label htmlFor="amarge">Marge (%)</label>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            name="amarge"
-                                            value={values.amarge}
-                                            onChange={handleInputChange}
-                                            placeholder="Entrez la marge en pourcentage"
-                                        />
-                                    </div>
-                                    <div className="form-group col-md-6">
-                                        <label htmlFor="auniteVnt">Prix unitaire avec marge</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="auniteVnt"
-                                            value={values.auniteVnt}
-                                            readOnly
-                                            placeholder="prix unitaire avec marge"
-                                        />
-                                    </div>
-                                </div>
+                                    <TextField
+                                        fullWidth
+                                        margin="normal"
+                                        label="Tx TVA"
+                                        name="atauxTva"
+                                        type="number"
+                                        value={values.atauxTva}
+                                        onChange={handleInputChange}
+                                        variant="outlined"
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                        }}
+                                    />
 
-                                <div className="row">
-                                    <div className="form-group col-md-6">
-                                        <label htmlFor="aremise">Remise (%)</label>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            name="aremise"
-                                            value={values.aremise}
-                                            onChange={handleInputChange}
-                                            placeholder="Entrez la remise en pourcentage"
-                                        />
-                                    </div>
-                                    <div className="form-group col-md-6">
-                                        <label htmlFor="aprixVntprom">Prix promotionnel</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="aprixVntprom"
-                                            value={values.aprixVntprom}
-                                            readOnly
-                                            placeholder="Prix après la promotion"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>    
-                        <div className="card mb-3">
-                        <div className="card-body">
-                            <h5>Stock</h5>
-                            <div className="form-group mt-3">
-                        <label htmlFor="aqteStock">Quantité</label>
-                        <input
-                            type="number"
-                            className={`form-control ${errors.aqteStock ? 'error-input' : ''}`}
-                            name="aqteStock"
-                            id="aqteStock"
-                            value={values.aqteStock}
-                            onChange={handleInputChange}
-                            placeholder="Entrez la quantité"
-                            min="0" // Assurez-vous que la quantité est un nombre positif
-                        />
-                        {errors.aqteStock && <span className="error-text">{errors.aqteStock}</span>}
-                    </div> 
-                         </div>
-                     </div>
-                     <div className="form-group">
-                            <button type="button" 
-                            className="btn btn-secondary "  margin-right= "10px"
-                            onClick={previousStep}>
+                                    <TextField
+                                        fullWidth
+                                        margin="normal"
+                                        label="Total TTC"
+                                        name="apvttc"
+                                        value={values.apvttc}
+                                        readOnly
+                                        variant="outlined"
+                                        InputProps={{
+                                            startAdornment: <InputAdornment position="start">dt</InputAdornment>,
+                                        }}
+                                    />
+
+                                    <TextField
+                                        fullWidth
+                                        margin="normal"
+                                        label="Marge (%)"
+                                        name="amarge"
+                                        type="number"
+                                        value={values.amarge}
+                                        onChange={handleInputChange}
+                                        variant="outlined"
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                        }}
+                                    />
+
+                                    <TextField
+                                        fullWidth
+                                        margin="normal"
+                                        label="Prix unitaire avec Marge"
+                                        name="auniteVnt"
+                                        value={values.auniteVnt}
+                                        readOnly
+                                        variant="outlined"
+                                        InputProps={{
+                                            startAdornment: <InputAdornment position="start">dt</InputAdornment>,
+                                        }}
+                                    />
+
+                                    <TextField
+                                        fullWidth
+                                        margin="normal"
+                                        label="Remise (%)"
+                                        name="aremise"
+                                        type="number"
+                                        value={values.aremise}
+                                        onChange={handleInputChange}
+                                        variant="outlined"
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                        }}
+                                    />
+
+                                    <TextField
+                                        fullWidth
+                                        margin="normal"
+                                        label="Prix après Remise"
+                                        name="aprixVntprom"
+                                        value={values.aprixVntprom}
+                                        readOnly
+                                        variant="outlined"
+                                        InputProps={{
+                                            startAdornment: <InputAdornment position="start">dt</InputAdornment>,
+                                        }}
+                                    />
+                                    <TextField
+                                        variant="outlined"
+                                        label="Quantité en Stock"
+                                        name="aqteStock"
+                                        value={values.aqteStock}
+                                        onChange={handleInputChange}
+                                        fullWidth
+                                        margin="normal"
+                                        type="number"
+                                        InputProps={{
+                                            inputProps: { min: 0 }, 
+                                        }}
+                                        error={!!errors.aqteStock}
+                                        helperText={errors.aqteStock}
+                                    />
+
+                                </CardContent>
+                            </Card>
+
+                        <Box display="flex" justifyContent="space-between" gap={2}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                fullWidth
+                                onClick={previousStep}
+                            >
                                 Précédent
-                            </button>
-                            <button 
-                                type="button" 
-                                className="btn btn-secondary" 
-                                onClick={handleFormSubmit}
+                            </Button>
+
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                                fullWidth
                                 disabled={loading}
                             >
-                                {loading ? 'Soumission en cours...' : 'Soumettre'}
-                            </button>
-                        </div>
-                   </>
+                                {loading ? <CircularProgress size={24} /> : 'Enregistrer'}
+                            </Button>
+                        </Box>
+                    </>
                 )}
             </form>
         </div>
