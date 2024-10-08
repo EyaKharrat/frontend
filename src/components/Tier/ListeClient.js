@@ -4,7 +4,8 @@ import { IoMdPersonAdd } from "react-icons/io";
 import { MdPersonSearch } from "react-icons/md";
 import { fetchClients, deleteClient } from './clientService';
 import { Client } from './Client';
-
+import { AiOutlineUserDelete } from "react-icons/ai";
+import { FaUserEdit } from "react-icons/fa";
 const ClientList = () => {
     const [clients, setClients] = useState([]);
     const [recordForEdit, setRecordForEdit] = useState(null);
@@ -137,8 +138,8 @@ const ClientList = () => {
                                 <TableCell>{client.cpays}</TableCell>
                                 <TableCell>{client.craisonSocial}</TableCell>
                                 <TableCell>
-                                    <Button onClick={() => handleAction(client, 'edit')} color="primary">Edit</Button>
-                                    <Button onClick={() => handleAction(client, 'delete')} color="secondary">Delete</Button>
+                                    <Button onClick={() => handleAction(client, 'edit')} color="primary"><FaUserEdit /></Button>
+                                    <Button onClick={() => handleAction(client, 'delete')} color="secondary"><AiOutlineUserDelete /></Button>
                                 </TableCell>
                             </TableRow>
                         ))}

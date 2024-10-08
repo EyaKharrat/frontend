@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button, InputAdornment, TextField } from '@mui/material';
-import { AiOutlineUserDelete } from "react-icons/ai";
-import { CiEdit } from "react-icons/ci";
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { IoMdPersonAdd } from "react-icons/io";
 import { MdPersonSearch } from "react-icons/md";
-import axiosInstance from '../../axiosInstance';
+import { fetchfournisseurs, deletefournisseur } from './fournisseurService';
+import { Fournisseur } from './Fournisseur';
+import { AiOutlineUserDelete } from "react-icons/ai";
+import { FaUserEdit } from "react-icons/fa";
 
 const FournisseurList = () => {
     const [fournisseurs, setfournisseurs] = useState([]);
@@ -14,15 +14,15 @@ const FournisseurList = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
-        fetchfournisseurs();
+        fetchfournisseursList();
     }, []);
 
-    const fetchfournisseurs = async () => {
+    const fetchfournisseursList = async () => {
         try {
-            const response = await axios.get('https://localhost:7029/api/Tiers/GetTier');
-            setfournisseurs(response.data);
+            const data = await fetchfournisseurs();
+            setfournisseurs(data);
         } catch (error) {
-            console.error('Error fetching fournisseurs', error);
+            console.error('Erreur lors de la récupération des fournisseurs', error);
         }
     };
 
@@ -42,12 +42,11 @@ const FournisseurList = () => {
 
     const handleDelete = async (cref) => {
         try {
-            await axiosInstance.delete(`https://localhost:7029/api/Tiers/DeleteTier/${cref}`);
+            await deletefournisseur(cref);
             setfournisseurs(fournisseurs.filter(fournisseur => fournisseur.cref !== cref));
-            alert('fournisseur deleted successfully!');
+            alert('Fournisseur supprimé avec succès!');
         } catch (error) {
-            console.error('Error deleting fournisseur', error);
-            alert('There was an error deleting the fournisseur!');
+            console.error('Erreur lors de la suppression du fournisseur', error);
         }
     };
 
@@ -83,84 +82,84 @@ const FournisseurList = () => {
     );
 
     return (
-        <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '700px', marginBottom: '10px' }}>
+        <div style={{ padding: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
                 <Button
-                    variant="outlined"
+                    variant="contained"
+                    color="primary"
+                    startIcon={<IoMdPersonAdd />}
                     onClick={handleClickOpen}
-                    style={{ height: '40px' }}
+                    style={{ marginRight: '20px' }}
                 >
-                    <IoMdPersonAdd /> Add fournisseur
+                    Ajouter fournisseur
                 </Button>
-                <TextField
-                    variant="outlined"
-                    placeholder="Search"
-                    value={searchQuery}
-                    onChange={handleSearch}
-                    style={{ flex: 1, height: '40px' }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <MdPersonSearch />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
+                <div style={{ flexGrow: 1 }}>
+                    <TextField
+                        variant="outlined"
+                        placeholder="Search"
+                        value={searchQuery}
+                        onChange={handleSearch}
+                        fullWidth
+                        InputProps={{
+                            startAdornment: (
+                                <IconButton>
+                                    <MdPersonSearch />
+                                </IconButton>
+                            ),
+                        }}
+                    />
+                </div>
             </div>
+
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Ref</TableCell>
+                            <TableCell>Type</TableCell>
+                            <TableCell>Nom et Prénom</TableCell>
+                            <TableCell>Adresse</TableCell>
+                            <TableCell>Ville</TableCell>
+                            <TableCell>Code Postal</TableCell>
+                            <TableCell>Pays</TableCell>
+                            <TableCell>Raison Sociale</TableCell>
+                            <TableCell>Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {filteredfournisseurs.map((fournisseur) => (
+                            <TableRow key={fournisseur.cref}>
+                                <TableCell>{fournisseur.cref}</TableCell>
+                                <TableCell>{fournisseur.typeC}</TableCell>
+                                <TableCell>{fournisseur.cnom} {fournisseur.cprenom}</TableCell>
+                                <TableCell>{fournisseur.cadresse}</TableCell>
+                                <TableCell>{fournisseur.cville}</TableCell>
+                                <TableCell>{fournisseur.ccodePostal}</TableCell>
+                                <TableCell>{fournisseur.cpays}</TableCell>
+                                <TableCell>{fournisseur.craisonSocial}</TableCell>
+                                <TableCell>
+                                    <Button onClick={() => handleAction(fournisseur, 'edit')} color="primary"><FaUserEdit /></Button>
+                                    <Button onClick={() => handleAction(fournisseur, 'delete')} color="secondary"><AiOutlineUserDelete /></Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
             <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>{recordForEdit ? 'Edit fournisseur' : 'Add fournisseur'}</DialogTitle>
+            <DialogTitle>{recordForEdit ? 'Modifier fournisseur' : 'Ajouter fournisseur'}</DialogTitle>
                 <DialogContent>
-                    <fournisseur recordForEdit={recordForEdit} addOrEdit={addOrEdit} />
+                    <Fournisseur
+                        recordForEdit={recordForEdit}
+                        addOrEdit={addOrEdit}
+                        onClose={handleClose}
+                    />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        Cancel
-                    </Button>
+                    <Button onClick={handleClose}>Fermer</Button>
                 </DialogActions>
             </Dialog>
-            <table className="table mt-3">
-                <thead>
-                    <tr>
-                        <th>Code fournisseur</th>
-                        <th>Type de fournisseur</th>
-                        <th>Nom Complet</th>
-                        <th>Ville</th>
-                        <th>Adresse</th>
-                        <th>Matricule Fiscale</th>
-                        <th>Raison Sociale</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredfournisseurs.map(fournisseur => (
-                        <tr key={fournisseur.cref}>
-                            <td>{fournisseur.cref}</td>
-                            <td>{fournisseur.typeC}</td>
-                            <td>{fournisseur.cnom} {fournisseur.cprenom}</td>
-                            <td>{fournisseur.cville}</td>
-                            <td>{fournisseur.cadresse}</td>
-                            <td>{fournisseur.cmatFiscal}</td>
-                            <td>{fournisseur.craisonSocial}</td>
-                            <td>
-                                <div>
-                                    <button 
-                                        onClick={() => handleAction(fournisseur, 'edit')} 
-                                        className="btn btn-warning btn-sm"
-                                    >
-                                        <CiEdit />
-                                    </button>
-                                    <button 
-                                        onClick={() => handleAction(fournisseur, 'delete')} 
-                                        className="btn btn-danger btn-sm"
-                                    >
-                                        <AiOutlineUserDelete />
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
         </div>
     );
 };

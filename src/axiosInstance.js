@@ -1,6 +1,4 @@
-// src/axiosInstance.js
 import axios from 'axios';
-
 
 const axiosInstance = axios.create({
   baseURL: 'https://localhost:7029/api', // Base URL of your API
@@ -29,7 +27,7 @@ axiosInstance.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Handle unauthorized access - redirect to login
       localStorage.removeItem('token');
-      window.location.href = '/'; // Redirect to login page
+      window.location.href = '/login'; 
     }
     return Promise.reject(error);
   }

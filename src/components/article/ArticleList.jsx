@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { Box, Grid, Typography, Card, CardMedia, CardContent, CardActions, Button, Container, TextField, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import Popup from '../Popup';
-import { Article } from './Article';
 import './Article.css';
 import { useArticleMethods } from './useArticleMethods';
 
 function ArticleList() {
-    const { articles, openPopup, recordForEdit, handleAddArticle, handleEdit, handleDelete, setOpenPopup, addOrEdit } = useArticleMethods();
+    const { articles,  handleAddArticle, handleEdit, handleDelete} = useArticleMethods();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedArticle, setSelectedArticle] = useState(null);
 
@@ -26,6 +24,7 @@ function ArticleList() {
         setSelectedArticle(null);
     };
 
+
     return (
         <Container>
             <Box className="search-container" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -41,19 +40,6 @@ function ArticleList() {
                     Add Article
                 </Button>
             </Box>
-            {openPopup && (
-                <Popup
-                    title={recordForEdit ? 'Edit Article' : 'Add Article'}
-                    openPopup={openPopup}
-                    setOpenPopup={setOpenPopup}
-                >
-                    <Article
-                        recordForEdit={recordForEdit}
-                        addOrEdit={addOrEdit}
-                        onClose={() => setOpenPopup(false)}
-                    />
-                </Popup>
-            )}
             <Grid container spacing={3}>
                 {filteredArticles.map((article) => (
                     <Grid item xs={12} sm={6} md={4} key={article.aref}>
@@ -125,16 +111,16 @@ function ArticleList() {
                     maxWidth="md"
                     fullWidth
                 >
-                    <DialogTitle>Détails de l'article</DialogTitle>
-                    <DialogContent>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <CardMedia
-                                component="img"
-                                height="400"
-                                image={selectedArticle.image || '/img/default.jpg'}
-                                alt={selectedArticle.adesignation}
-                                sx={{ objectFit: 'contain', borderRadius: '8px', marginBottom: 2, width: '100%' }}
-                            />
+                     <DialogTitle>Détails de l'article</DialogTitle>
+                        <DialogContent>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <CardMedia
+                                    component="img"
+                                    height="400"
+                                    image={selectedArticle.image || '/img/default.jpg'}
+                                    alt={selectedArticle.adesignation}
+                                    sx={{ objectFit: 'contain', borderRadius: '8px', marginBottom: 2, width: '100%' }}
+                                />
                             <Typography variant="h6">
                             <strong>Référence:</strong>{selectedArticle.aref}
                             </Typography>

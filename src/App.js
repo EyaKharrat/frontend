@@ -4,11 +4,10 @@ import './App.scss';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Registre from "./components/account/Registre";
 import Login from "./components/account/Login";
-import Home from "./home/Home";
+import WelcomePage from './home/WelcomPage';
 import Logout from "./components/account/Logout";
 import { Client } from "./components/Tier/Client";
 import ClientList from "./components/Tier/ListeClient";
-import DetailBonCommande from "./components/documentBonDeCommande/DocumentDetail";
 import ArticleList from "./components/article/ArticleList";
 import { Article } from './components/article/Article';
 import Sidebar from './components/sidebar/Sidebar';
@@ -16,13 +15,17 @@ import ProtectedRoute from './ProtectedRoute';
 import { Fournisseur } from './components/Tier/Fournisseur';
 import FournisseurList from './components/Tier/ListeFournisseur';
 import AddBonDeCommande from './components/documentBonDeCommande/DocumentBonDeCommande';
-import OrderForm from './PurchaseOrderForm';
 import StockManager from './components/article/StockManager';
+import OrderDetailsPage from './components/documentBonDeCommande/OrderDetailsPage';
+import BonEntree from './components/bonEntree/bonEntree';
+import Home from './home/Home';
+import OrderListPage from './components/documentBonDeCommande/OrderListPage';
+import BonEntreeList from './components/bonEntree/BonEntreeList';
 const App = () => {
   const location = useLocation();
 
   // Définir les routes où le Sidebar et le Navbar ne doivent pas être affichés
-  const noSidebarRoutes = ['/', '/registre'];
+  const noSidebarRoutes = ['/login', '/registre','/'];
 //  const noNavbarRoutes = ['/', '/registre'];
 
   return (
@@ -33,11 +36,14 @@ const App = () => {
         {/* Afficher Navbar si l'URL actuelle n'est pas dans noNavbarRoutes */}
         {/*!noNavbarRoutes.includes(location.pathname) && <Navbar />*/}
         <Routes>
-          <Route path='/orderForm' element={<ProtectedRoute element={OrderForm} />} />
+          <Route path='/' element={<WelcomePage/>} />
+          <Route path='/bonEntreeList' element={<ProtectedRoute element={BonEntreeList} />} />
+          <Route path='/order' element={<ProtectedRoute element={OrderListPage} />} />
           <Route path='/home' element={<ProtectedRoute element={Home} />} />
+          <Route path='/order/:uniqueId' element={<ProtectedRoute element={OrderDetailsPage} />} />
           <Route path='/stock' element={<ProtectedRoute element={StockManager} />} />
           <Route path='/document' element={<ProtectedRoute element={AddBonDeCommande} />} />
-          <Route path='/listboncommande' element={<ProtectedRoute element={DetailBonCommande} />} />
+          <Route path='/bonEntree' element={<ProtectedRoute element={BonEntree } />} />
           <Route path='/clientlist' element={<ProtectedRoute element={ClientList} />} />
           <Route path='/client' element={<ProtectedRoute element={Client} />} />
           <Route path='/fournisseur' element={<ProtectedRoute element={Fournisseur} />} />
@@ -46,7 +52,7 @@ const App = () => {
           <Route path='/article' element={<ProtectedRoute element={Article} />} />
           <Route path='/logout' element={<ProtectedRoute element={Logout} />} />
           <Route path='/registre' element={<Registre />} />
-          <Route path='/' element={<Login />} />
+          <Route path='/login' element={<Login />} />
         </Routes>
       </div>
     </div>

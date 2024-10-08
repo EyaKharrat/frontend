@@ -1,22 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import { Container, Typography, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import axiosInstance from '../../axiosInstance';
+import { Container, Typography, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, MenuItem, Select, InputLabel, FormControl, Alert } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const StockManager = () => {
   const [items, setItems] = useState([]);
   const [selectedAref, setSelectedAref] = useState('');
   const [aqteStock, setAqteStock] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const fetchItems = useCallback(async () => {
     try {
-      const response = await axios.get('https://localhost:7029/api/Articles');
+      const response = await axiosInstance.get('https://localhost:7029/api/Articles');
       setItems(response.data);
       if (response.data.length > 0 && !selectedAref) {
         setSelectedAref(response.data[0].aref);
         setAqteStock(response.data[0].aqteStock);
       }
     } catch (error) {
+      setError('Erreur lors de la récupération des données de stock.');
       console.error('Error fetching stock data', error);
     }
   }, [selectedAref]);
@@ -25,23 +28,26 @@ const StockManager = () => {
     fetchItems();
   }, [fetchItems]);
 
-  const handleUpdateStock = async (e) => {
-    e.preventDefault();
+  const handleUpdateStock = async () => {
     try {
       const updatedItem = { aref: selectedAref, aqteStock: Number(aqteStock) };
-      await axios.put('https://localhost:7029/api/Articles/update-stock', updatedItem);
+      await axiosInstance.put(`https://localhost:7029/api/Articles/${selectedAref}`, updatedItem);
       setAqteStock('');
+      setSuccess('Stock mis à jour avec succès.');
       fetchItems();
     } catch (error) {
+      setError('Erreur lors de la mise à jour du stock.');
       console.error('Error updating stock', error);
     }
   };
 
   const handleDeleteItem = async (aref) => {
     try {
-      await axios.delete(`https://localhost:7029/api/Articles/${aref}`);
+      await axiosInstance.delete(`https://localhost:7029/api/Articles/${aref}`);
+      setSuccess('Article supprimé avec succès.');
       fetchItems();
     } catch (error) {
+      setError('Erreur lors de la suppression de l\'article.');
       console.error('Error deleting item', error);
     }
   };
@@ -53,12 +59,19 @@ const StockManager = () => {
     setAqteStock(selectedItem ? selectedItem.aqteStock : '');
   };
 
+  const handleSubmit = (event) => {
+    event.preventDefault(); // Prevent the default form submission
+    handleUpdateStock();
+  };
+
   return (
     <Container maxWidth="md">
       <Typography variant="h4" gutterBottom>
         Gestion de Stock
       </Typography>
-      <form onSubmit={handleUpdateStock}>
+      {error && <Alert severity="error">{error}</Alert>}
+      {success && <Alert severity="success">{success}</Alert>}
+      <form onSubmit={handleSubmit}>
         <FormControl fullWidth margin="normal">
           <InputLabel>Référence de l'article</InputLabel>
           <Select

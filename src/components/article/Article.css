@@ -3,23 +3,28 @@
   margin-top: 60px; /* Ajustez la marge supérieure selon vos besoins */
 }
 
-.form-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  background-color: #fff;
+.form-row {
+  display: inline-block;
+  width: 49%; /* Adjust the width to fit three fields in one row */
+  margin-right: 1%; /* Adjust the margin between fields */
+  box-sizing: border-box; /* Ensure padding and borders are included in width */
+}
+.full-width {
+  width: 99%;
 }
 
+.form-container {
+  display: flex;
+  flex-wrap: wrap; /* Ensure the fields wrap if the screen is too small */
+  justify-content: space-between; /* Align items with space between */
+}
 
 .form-group {
   margin-bottom: 20px;
 }
 
 .form-control {
-  width: 100%;
+  width: 50%;
   padding: 8px;
   border-radius: 4px;
   border: 1px solid #ccc;
@@ -69,23 +74,39 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: #fff;
 }
-
-.card-img-top-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 40%; /* Adjusted to 40% width */
-  margin: 0 auto; /* Center horizontally */
+.textarea-style {
+  width: 100%;
+  padding: 16.5px 14px; /* Same as TextField */
+  border-radius: 4px; /* Same as TextField */
+  border: 1px solid #ccc; /* Same border style */
+  font-size: 1rem; /* Match the font size */
+  line-height: 1.4375em; /* Match the line height */
+  color: rgba(0, 0, 0, 0.87); /* Same text color */
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif; /* Same font */
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition */
 }
 
-.card-img-top {
-  width: 100%; /* Make the image responsive */
-  height: auto;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.textarea-style:focus {
+  border-color: #3f51b5; /* Focus color like Material-UI */
+  box-shadow: 0 0 5px rgba(63, 81, 181, 0.5); /* Add shadow on focus */
 }
 
-/* ArticleList.css */
+.error-input {
+  border-color: red; /* Highlight error */
+}
+
+.error-text {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+
+
+
+
 
 
 /* Style pour le tableau des articles */
@@ -119,7 +140,7 @@
 }
 .article-image {
   max-width: 100%; /* Make sure the image fits within the container */
-  max-height: 300px; /* Allow for taller images */
+  max-height: 100px; /* Allow for taller images */
   width: auto;
   height: auto;
   display: block; /* Ensure the image is treated as a block-level element */

@@ -1,36 +1,36 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { IconButton, List, ListItem, ListItemIcon, ListItemText, Collapse} from '@mui/material';
-import { Menu as MenuIcon, Home, AccountCircle, Article, ExpandLess, ExpandMore, Logout } from '@mui/icons-material';
+import { IconButton, List, ListItem, ListItemIcon, ListItemText, Collapse } from '@mui/material';
+import { Menu as MenuIcon, Home, AccountCircle, Article, ExpandLess, ExpandMore, Logout, Add, ListAlt, ShoppingCart, LocalShipping, Store, Inventory } from '@mui/icons-material';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './sidebar.scss';
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
-  const [clientSubmenuOpen, setClientSubmenuOpen] = useState(false);
-  const [fournisseurSubmenuOpen, setFournisseurSubmenuOpen] = useState(false);
   const [articleSubmenuOpen, setArticleSubmenuOpen] = useState(false);
-  const [ setProfileMenuAnchor] = useState(null);
+  const [venteSubmenuOpen, setVenteSubmenuOpen] = useState(false);
+  const [achatSubmenuOpen, setAchatSubmenuOpen] = useState(false);
+  const [stockSubmenuOpen, setStockSubmenuOpen] = useState(false);
   const userName = localStorage.getItem('email');
 
   const handleToggle = () => {
     setOpen(!open);
   };
 
-  const handleClientSubmenuToggle = () => {
-    setClientSubmenuOpen(!clientSubmenuOpen);
-  };
-
-  const handleFournisseurSubmenuToggle = () => {
-    setFournisseurSubmenuOpen(!fournisseurSubmenuOpen);
-  };
-
   const handleArticleSubmenuToggle = () => {
     setArticleSubmenuOpen(!articleSubmenuOpen);
   };
 
-  const handleProfileMenuOpen = (event) => {
-    setProfileMenuAnchor(event.currentTarget);
+  const handleVenteSubmenuToggle = () => {
+    setVenteSubmenuOpen(!venteSubmenuOpen);
+  };
+
+  const handleAchatSubmenuToggle = () => {
+    setAchatSubmenuOpen(!achatSubmenuOpen);
+  };
+
+  const handleStockSubmenuToggle = () => {
+    setStockSubmenuOpen(!stockSubmenuOpen);
   };
 
   return (
@@ -44,45 +44,11 @@ const Sidebar = () => {
           <ListItemText primary="Accueil" />
         </ListItem>
 
-        {/* Profile Section with Settings Option */}
-        <ListItem button onClick={handleProfileMenuOpen}>
+        {/* Profile Section */}
+        <ListItem button>
           <ListItemIcon><AccountCircle /></ListItemIcon>
           <ListItemText primary={userName ? userName : 'Hello, Guest'} />
         </ListItem>
-
-        {/* Client Submenu */}
-        <ListItem button onClick={handleClientSubmenuToggle}>
-          <ListItemIcon><AccountCircle /></ListItemIcon>
-          <ListItemText primary="Client" />
-          {clientSubmenuOpen ? <ExpandLess /> : <ExpandMore />}
-        </ListItem>
-        <Collapse in={clientSubmenuOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItem button component={Link} to="/clientlist">
-              <ListItemText inset primary="Client List" />
-            </ListItem>
-            <ListItem button component={Link} to="/client">
-              <ListItemText inset primary="Ajouter un client" />
-            </ListItem>
-          </List>
-        </Collapse>
-
-        {/* Fournisseur Submenu */}
-        <ListItem button onClick={handleFournisseurSubmenuToggle}>
-          <ListItemIcon><AccountCircle /></ListItemIcon>
-          <ListItemText primary="Fournisseur" />
-          {fournisseurSubmenuOpen ? <ExpandLess /> : <ExpandMore />}
-        </ListItem>
-        <Collapse in={fournisseurSubmenuOpen} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItem button component={Link} to="/fournisseurlist">
-              <ListItemText inset primary="Fournisseur List" />
-            </ListItem>
-            <ListItem button component={Link} to="/fournisseur">
-              <ListItemText inset primary="Ajouter un fournisseur" />
-            </ListItem>
-          </List>
-        </Collapse>
 
         {/* Articles Submenu */}
         <ListItem button onClick={handleArticleSubmenuToggle}>
@@ -92,18 +58,85 @@ const Sidebar = () => {
         </ListItem>
         <Collapse in={articleSubmenuOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
+            <ListItem button component={Link} to="/article">
+              <ListItemIcon><Add /></ListItemIcon>
+              <ListItemText inset primary="Ajouter un article" />
+            </ListItem>
             <ListItem button component={Link} to="/articleList">
+              <ListItemIcon><ListAlt /></ListItemIcon>
               <ListItemText inset primary="Collections" />
             </ListItem>
-            <ListItem button component={Link} to="/article">
-              <ListItemText inset primary="Ajouter un article" />
+          </List>
+        </Collapse>
+
+        {/* Vente Submenu */}
+        <ListItem button onClick={handleVenteSubmenuToggle}>
+          <ListItemIcon><ShoppingCart /></ListItemIcon>
+          <ListItemText primary="Vente" />
+          {venteSubmenuOpen ? <ExpandLess /> : <ExpandMore />}
+        </ListItem>
+        <Collapse in={venteSubmenuOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItem button component={Link} to="/client">
+              <ListItemIcon><Add /></ListItemIcon>
+              <ListItemText inset primary="Ajouter un client" />
+            </ListItem>
+            <ListItem button component={Link} to="/clientlist">
+              <ListItemIcon><ListAlt /></ListItemIcon>
+              <ListItemText inset primary="Liste des clients" />
+            </ListItem>
+            <ListItem button component={Link} to="/document">
+              <ListItemIcon><Store /></ListItemIcon>
+              <ListItemText inset primary="Bon de commande" />
+            </ListItem>
+            <ListItem button component={Link} to="/order">
+              <ListItemIcon><ListAlt /></ListItemIcon>
+              <ListItemText inset primary="Liste Bon de Commande" />
+            </ListItem>
+          </List>
+        </Collapse>
+
+        {/* Achat Submenu */}
+        <ListItem button onClick={handleAchatSubmenuToggle}>
+          <ListItemIcon><LocalShipping /></ListItemIcon>
+          <ListItemText primary="Achat" />
+          {achatSubmenuOpen ? <ExpandLess /> : <ExpandMore />}
+        </ListItem>
+        <Collapse in={achatSubmenuOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItem button component={Link} to="/fournisseur">
+              <ListItemIcon><Add /></ListItemIcon>
+              <ListItemText inset primary="Ajouter un fournisseur" />
+            </ListItem>
+            <ListItem button component={Link} to="/fournisseurlist">
+              <ListItemIcon><ListAlt /></ListItemIcon>
+              <ListItemText inset primary="Liste des fournisseurs" />
+            </ListItem>
+            <ListItem button component={Link} to="/bonEntree">
+              <ListItemIcon><Store /></ListItemIcon>
+              <ListItemText inset primary="Bon d'entrée" />
+            </ListItem>
+          </List>
+        </Collapse>
+
+        {/* New Stock Submenu */}
+        <ListItem button onClick={handleStockSubmenuToggle}>
+          <ListItemIcon><Inventory /></ListItemIcon>
+          <ListItemText primary="Stock" />
+          {stockSubmenuOpen ? <ExpandLess /> : <ExpandMore />}
+        </ListItem>
+        <Collapse in={stockSubmenuOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItem button component={Link} to="/stock">
+              <ListItemIcon><ListAlt /></ListItemIcon>
+              <ListItemText inset primary="Vue du Stock" />
             </ListItem>
           </List>
         </Collapse>
 
         <ListItem button component={Link} to="/logout">
           <ListItemIcon><Logout /></ListItemIcon>
-          <ListItemText primary="Logout" />
+          <ListItemText primary="Déconnexion" />
         </ListItem>
       </List>
     </div>

@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Avatar,
   Button,
   TextField,
-  Link,
   Grid,
   Box,
   Typography,
@@ -15,6 +13,8 @@ import {
 } from '@mui/material';
 import { LockOutlined as LockOutlinedIcon } from '@mui/icons-material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import axios from 'axios';
+import Link from '@mui/material/Link';
 
 const theme = createTheme();
 
@@ -44,22 +44,22 @@ const Registre = () => {
   const validate = () => {
     const errors = {};
     if (!formData.Name.trim()) {
-      errors.Name = 'Name is required';
+      errors.Name = 'Le nom est requis';
     }
     if (!formData.Email.trim()) {
-      errors.Email = 'Email is required';
+      errors.Email = 'L\'adresse email est requise';
     } else if (!/\S+@\S+\.\S+/.test(formData.Email)) {
-      errors.Email = 'Email is invalid';
+      errors.Email = 'L\'adresse email est invalide';
     }
     if (!formData.Password) {
-      errors.Password = 'Password is required';
+      errors.Password = 'Le mot de passe est requis';
     } else if (formData.Password.length < 6) {
-      errors.Password = 'Password must be at least 6 characters';
+      errors.Password = 'Le mot de passe doit comporter au moins 6 caractères';
     }
     if (!formData.ConfirmPassword) {
-      errors.ConfirmPassword = 'Confirm Password is required';
+      errors.ConfirmPassword = 'La confirmation du mot de passe est requise';
     } else if (formData.ConfirmPassword !== formData.Password) {
-      errors.ConfirmPassword = 'Passwords do not match';
+      errors.ConfirmPassword = 'Les mots de passe ne correspondent pas';
     }
     return errors;
   };
@@ -86,15 +86,15 @@ const Registre = () => {
       const response = await axios.post("https://localhost:7029/api/Account/register", requestData);
   
       if (response.status === 200) {
-        alert("Registration Successful");
+        alert("Inscription réussie");
         setFormData(initialFormData);
         setErrors({});
-        navigate('/');
+        navigate('/login');
       } else {
-        setError("Registration Failed");
+        setError("Échec de l'inscription");
       }
     } catch (err) {
-      setError(err.message || 'Error occurred during registration');
+      setError(err.message || 'Une erreur est survenue lors de l\'inscription');
     } finally {
       setLoading(false);
     }
@@ -102,100 +102,114 @@ const Registre = () => {
   
   return (
     <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
-        <Box
-          sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign Up
-          </Typography>
-          {error && (
-            <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-          <Box component="form" onSubmit={save} noValidate sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="Name"
-              label="Name"
-              name="Name"
-              autoComplete="name"
-              autoFocus
-              value={formData.Name}
-              onChange={handleChange}
-              error={Boolean(errors.Name)}
-              helperText={errors.Name}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="Email"
-              label="Email Address"
-              name="Email"
-              autoComplete="email"
-              value={formData.Email}
-              onChange={handleChange}
-              error={Boolean(errors.Email)}
-              helperText={errors.Email}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="Password"
-              label="Password"
-              type="password"
-              id="Password"
-              autoComplete="current-password"
-              value={formData.Password}
-              onChange={handleChange}
-              error={Boolean(errors.Password)}
-              helperText={errors.Password}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="ConfirmPassword"
-              label="Confirm Password"
-              type="password"
-              id="ConfirmPassword"
-              value={formData.ConfirmPassword}
-              onChange={handleChange}
-              error={Boolean(errors.ConfirmPassword)}
-              helperText={errors.ConfirmPassword}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Sign Up'}
-            </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="/" variant="body2">
-                  Already have an account? Sign in
-                </Link>
+      <Box
+        sx={{
+          backgroundImage: `url('/img/8492615.jpg')`, // Remplacez par le chemin de votre image de fond
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Container component="main" maxWidth="xs">
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              bgcolor: 'rgba(255, 255, 255, 0.8)',
+              p: 4,
+              borderRadius: 2,
+            }}
+          >
+            <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Inscription
+            </Typography>
+            {error && (
+              <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
+                {error}
+              </Alert>
+            )}
+            <Box component="form" onSubmit={save} noValidate sx={{ mt: 1 }}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="Name"
+                label="Nom"
+                name="Name"
+                autoComplete="name"
+                autoFocus
+                value={formData.Name}
+                onChange={handleChange}
+                error={Boolean(errors.Name)}
+                helperText={errors.Name}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="Email"
+                label="Adresse email"
+                name="Email"
+                autoComplete="email"
+                value={formData.Email}
+                onChange={handleChange}
+                error={Boolean(errors.Email)}
+                helperText={errors.Email}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="Password"
+                label="Mot de passe"
+                type="password"
+                id="Password"
+                autoComplete="current-password"
+                value={formData.Password}
+                onChange={handleChange}
+                error={Boolean(errors.Password)}
+                helperText={errors.Password}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="ConfirmPassword"
+                label="Confirmer le mot de passe"
+                type="password"
+                id="ConfirmPassword"
+                value={formData.ConfirmPassword}
+                onChange={handleChange}
+                error={Boolean(errors.ConfirmPassword)}
+                helperText={errors.ConfirmPassword}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} /> : 'Inscription'}
+              </Button>
+              <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <Link component={RouterLink} to="/login" variant="body2">
+                  {"Vous avez déjà un compte ? Connectez-vous"}
+                  </Link>
+                </Grid>
               </Grid>
-            </Grid>
+            </Box>
           </Box>
-        </Box>
-      </Container>
+        </Container>
+      </Box>
     </ThemeProvider>
   );
 };

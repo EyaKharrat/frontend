@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addArticle, updateArticle } from './articleService';
 import { MenuItem,TextField,Button,Card,CardContent,CircularProgress,InputAdornment,Box,FormControl,FormHelperText,Typography } from '@mui/material';
-
+import './Article.css';
 const initialFieldValues = {
     adesignation: '',
     afamille: '',
@@ -25,7 +25,6 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState('/img/up.jpg');
-    const [step, setStep] = useState(1);
 
     useEffect(() => {
         if (recordForEdit) {
@@ -36,24 +35,19 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
 
     const calculateValues = (apuventeHt, amarge, apvttc, aremise, auniteVnt) => {
         let priceAfterDiscount = '';
-
         if (apuventeHt) {
             const priceHt = parseFloat(apuventeHt);
             const tvaRate = 19 / 100;
             apvttc = priceHt * (1 + tvaRate);
-
             const marge = parseFloat(amarge) / 100;
             auniteVnt = priceHt * (1 + marge);
         }
-
         if (auniteVnt && aremise) {
             const remise = parseFloat(aremise) / 100;
             priceAfterDiscount = auniteVnt - (auniteVnt * remise);
         }
-
         return { apvttc, auniteVnt, priceAfterDiscount };
     };
-
     useEffect(() => {
         const { apvttc, auniteVnt, priceAfterDiscount } = calculateValues(values.apuventeHt, values.amarge, values.apvttc, values.aremise);
         setValues(prev => ({
@@ -135,32 +129,13 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
             }
         }
     };
-
-    const nextStep = () => {
-        if (validate()) {
-            setStep(step + 1);
-        }
-    };
-
-    const previousStep = () => {
-        setStep(step - 1);
-    };
-
-    const formContainerStyle = {
-        maxWidth: '600px',
-        margin: '20px auto',
-        padding: '20px',
-        border: '1px solid #e0e0e0',
-        borderRadius: '8px',
-        boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-        backgroundColor: '#ffffff',
-    };
+   
 
     return (
-        <div style={formContainerStyle}>
+        <div className="container mt-3">
             <form autoComplete="off" onSubmit={handleFormSubmit}>
-                {step === 1 && (
-                    <>
+            <Card sx={{ mb: 3 }}>
+            <CardContent>
                      <Typography variant="h6" component="div" sx={{ mb: 2 }}>
                         {recordForEdit ? 'Edit Article' : 'Nouveau(-el) Article'}
                     </Typography>
@@ -172,22 +147,27 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
                                     id="image-upload"
                                     onChange={showPreview}
                                 />
+                               
                                 <label htmlFor="image-upload">
+                                <div className="full-width">
                                     <Button variant="contained" component="span" fullWidth>
                                         Télécharger une image
                                     </Button>
+                                    </div>
                                 </label>
+                             
                                 <div style={{ textAlign: 'center', marginTop: '10px' }}>
                                     {imagePreview && (
                                         <img
                                             src={imagePreview}
                                             alt="Article"
-                                            style={{ maxWidth: '40%', height: '50%' }}
+                                            style={{ maxWidth: '20%', height: '30%' }}
                                         />
                                     )}
                                 </div>
                                 {errors.image && <FormHelperText error>{errors.image}</FormHelperText>}
                             </FormControl>
+                            <div className="full-width">
                             <TextField
                                     fullWidth
                                     margin="normal"
@@ -227,6 +207,8 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
                                     <MenuItem value="Carte cadeaux">Carte cadeaux</MenuItem>
                                     <MenuItem value="Non classé">Non classé</MenuItem>
                                 </TextField>
+                                </div>
+                        <div className="form-row">
                             <TextField
                                fullWidth
                                margin="normal"
@@ -238,7 +220,8 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
                                helperText={errors.afamille}
                                error={!!errors.afamille}
                            />
-
+                        </div>
+                        <div className="form-row">
                             <TextField
                                 fullWidth
                                 margin="normal"
@@ -250,159 +233,127 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
                                 helperText={errors.asfamille}
                                 error={!!errors.asfamille}
                             />
-                           <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Désingation"
+                        </div>
+                        <div >
+                            <textarea
                                 name="adesignation"
                                 value={values.description}
                                 onChange={handleInputChange}
-                                variant="outlined"
-                                helperText={errors.adesignation}
-                                error={!!errors.adesignation}
+                                className="textarea-style"
+                                placeholder="Désignation"
+                                rows={5} 
+                                style={{ width: '99%' }} 
                             />
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={nextStep}
+                            {errors.adesignation && (
+                                <p className="error-text">{errors.adesignation}</p>
+                            )}
+                            </div>
+                            <div className="form-row">
+                                <TextField
                                 fullWidth
-                                sx={{ marginTop: 2 }}
-                            >
-                                Suivant
-                            </Button>
-                    </>
-                )}
-                {step === 2 && (
-                    <>
-                        <Typography variant="h6" component="div" sx={{ mb: 2 }}>
-                            Informations sur les prix
-                        </Typography>
-                                <Card sx={{ mb: 3 }}>
-                                <CardContent>
-                                    <h5>Prix de l'article</h5>
-                                    <TextField
-                                        fullWidth
-                                        margin="normal"
-                                        label="Prix de vente HT"
-                                        name="apuventeHt"
-                                        type="number"
-                                        value={values.apuventeHt}
-                                        onChange={handleInputChange}
-                                        variant="outlined"
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">dt</InputAdornment>,
-                                        }}
-                                    />
-
-                                    <TextField
-                                        fullWidth
-                                        margin="normal"
-                                        label="Tx TVA"
-                                        name="atauxTva"
-                                        type="number"
-                                        value={values.atauxTva}
-                                        onChange={handleInputChange}
-                                        variant="outlined"
-                                        InputProps={{
-                                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                                        }}
-                                    />
-
-                                    <TextField
-                                        fullWidth
-                                        margin="normal"
-                                        label="Total TTC"
-                                        name="apvttc"
-                                        value={values.apvttc}
-                                        readOnly
-                                        variant="outlined"
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">dt</InputAdornment>,
-                                        }}
-                                    />
-
-                                    <TextField
-                                        fullWidth
-                                        margin="normal"
-                                        label="Marge (%)"
-                                        name="amarge"
-                                        type="number"
-                                        value={values.amarge}
-                                        onChange={handleInputChange}
-                                        variant="outlined"
-                                        InputProps={{
-                                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                                        }}
-                                    />
-
-                                    <TextField
-                                        fullWidth
-                                        margin="normal"
-                                        label="Prix unitaire avec Marge"
-                                        name="auniteVnt"
-                                        value={values.auniteVnt}
-                                        readOnly
-                                        variant="outlined"
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">dt</InputAdornment>,
-                                        }}
-                                    />
-
-                                    <TextField
-                                        fullWidth
-                                        margin="normal"
-                                        label="Remise (%)"
-                                        name="aremise"
-                                        type="number"
-                                        value={values.aremise}
-                                        onChange={handleInputChange}
-                                        variant="outlined"
-                                        InputProps={{
-                                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                                        }}
-                                    />
-
-                                    <TextField
-                                        fullWidth
-                                        margin="normal"
-                                        label="Prix après Remise"
-                                        name="aprixVntprom"
-                                        value={values.aprixVntprom}
-                                        readOnly
-                                        variant="outlined"
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">dt</InputAdornment>,
-                                        }}
-                                    />
-                                    <TextField
-                                        variant="outlined"
-                                        label="Quantité en Stock"
-                                        name="aqteStock"
-                                        value={values.aqteStock}
-                                        onChange={handleInputChange}
-                                        fullWidth
-                                        margin="normal"
-                                        type="number"
-                                        InputProps={{
-                                            inputProps: { min: 0 }, 
-                                        }}
-                                        error={!!errors.aqteStock}
-                                        helperText={errors.aqteStock}
-                                    />
-
-                                </CardContent>
+                                margin="normal"
+                                label="Prix de vente HT"
+                                name="apuventeHt"
+                                type="number"
+                                value={values.apuventeHt}
+                                onChange={handleInputChange}
+                                variant="outlined"
+                                />
+                            </div>
+                            <div className="form-row">
+                                <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Taux de TVA (%)"
+                                name="atauxTva"
+                                type="number"
+                                value={values.atauxTva}
+                                onChange={handleInputChange}
+                                variant="outlined"
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                }}
+                                sx={{ mb: 2 }}
+                                />
+                            </div>
+                                <div className="full-width">
+                                <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Total TTC"
+                                name="apvttc"
+                                value={values.apvttc}
+                                readOnly
+                                variant="outlined"
+                                />
+                                </div>
+                            <div className="form-row">
+                                <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Marge (%)"
+                                name="amarge"
+                                type="number"
+                                value={values.amarge}
+                                onChange={handleInputChange}
+                                variant="outlined"
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                }}
+                                sx={{ mb: 2 }}
+                                />
+                            </div>
+                            <div className="form-row">
+                                 <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Prix unitaire avec Marge"
+                                name="auniteVnt"
+                                value={values.auniteVnt}
+                                readOnly
+                                />
+                            </div>
+                            <div className="form-row">
+                                <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Remise (%)"
+                                name="aremise"
+                                type="number"
+                                value={values.aremise}
+                                onChange={handleInputChange}
+                                variant="outlined"
+                                InputProps={{
+                                    endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                                }}
+                                sx={{ mb: 2 }}
+                                />
+                            </div>
+                            <div className="form-row">
+                                <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Prix après Remise"
+                                name="aprixVntprom"
+                                value={values.aprixVntprom}
+                                readOnly
+                                />
+                            </div>
+                            <div className="full-width">
+                                <TextField
+                                fullWidth
+                                margin="normal"
+                                label="Quantité en Stock"
+                                name="aqteStock"
+                                value={values.aqteStock}
+                                onChange={handleInputChange}
+                                variant="outlined"
+                                sx={{ mb: 2 }}
+                                />
+                             </div>
+                            </CardContent>
                             </Card>
-
                         <Box display="flex" justifyContent="space-between" gap={2}>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                fullWidth
-                                onClick={previousStep}
-                            >
-                                Précédent
-                            </Button>
-
                             <Button
                                 type="submit"
                                 variant="contained"
@@ -413,8 +364,6 @@ export const Article = ({ recordForEdit, addOrEdit, onClose }) => {
                                 {loading ? <CircularProgress size={24} /> : 'Enregistrer'}
                             </Button>
                         </Box>
-                    </>
-                )}
             </form>
         </div>
     );
